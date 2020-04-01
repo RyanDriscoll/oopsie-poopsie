@@ -1,0 +1,15 @@
+{
+  "build": {
+    "env": {
+      "FB_ADMIN_CREDENTIAL": "@os-fb-admin-credential",
+      "FB_API_KEY": "@os-fb-api-key",
+      "AUTH_DOMAIN": "@os-auth-domain",
+      "DB_URL": "@os-db-url",
+      "PROJECT_ID": "@os-project-id",
+      "STORAGE_BUCKET": "@os-storage-bucket",
+      "MESSAGING_SENDER_ID": "@os-messaging-sender-id",
+      "APP_ID": "@os-app-id",
+      "MEASUREMENT_ID": "@os-measurement-id"
+    }
+  }
+}

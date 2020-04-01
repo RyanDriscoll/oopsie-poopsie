@@ -1,0 +1,12 @@
+@import "../global/variables";
+
+.enter_game_button {
+  text-decoration: none;
+  font-family: $font-bold;
+  font-size: 25px;
+}
+
+.copied {
+  position: absolute;
+  bottom: -35px;
+}
