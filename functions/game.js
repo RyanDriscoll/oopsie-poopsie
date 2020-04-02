@@ -114,9 +114,11 @@ exports.playCard = async (req, res) => {
       leadSuit
     } = body;
     const updateObj = {};
+    if (leadSuit) {
+      updateObj[`rounds/${roundId}/tricks/${trickId}/leadSuit`] = leadSuit;
+    }
     updateObj[`rounds/${roundId}/tricks/${trickId}/cards/${playerId}`] = card;
     updateObj[`rounds/${roundId}/tricks/${trickId}/leader`] = leader;
-    updateObj[`games/${gameId}/leadSuit`] = leadSuit;
     updateObj[`games/${gameId}/currentPlayer`] = nextPlayerId;
     updateObj[`hands/${playerId}/cards/${card.cardId}`] = null;
     if (allCardsIn) {
@@ -125,7 +127,6 @@ exports.playCard = async (req, res) => {
       const trickKey = trickRef.key;
       updateObj[`rounds/${roundId}/tricks/${trickKey}/trickId`] = trickKey;
       updateObj[`games/${gameId}/currentPlayer`] = leader;
-      updateObj[`games/${gameId}/leadSuit`] = null;
       updateObj[`rounds/${roundId}/tricks/${trickId}/winner`] = leader;
     }
     await ref().update(updateObj);
