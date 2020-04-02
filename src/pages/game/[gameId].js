@@ -12,14 +12,18 @@ import InputGroupAddon from "reactstrap/lib/InputGroupAddon";
 import InputGroupText from "reactstrap/lib/InputGroupText";
 import Row from "reactstrap/lib/Row";
 import Col from "reactstrap/lib/Col";
+import Modal from "reactstrap/lib/Modal";
+import ModalBody from "reactstrap/lib/ModalBody";
 import CombinedContext from "../../context/CombinedContext";
 import { ref } from "../../lib/firebase";
 import styles from "../../styles/pages/game.module.scss";
 import CardRow from "../../components/CardRow";
 import { getSource, getColor } from "../../utils/helpers";
+import Spinner from "../../components/Spinner";
 
 class Game extends Component {
   state = {
+    loading: false,
     game: null,
     players: [],
     playerId: null,
@@ -29,6 +33,8 @@ class Game extends Component {
     bid: "",
     bids: {},
     tricks: [],
+    trickIndex: 0,
+    trickWinner: null,
     score: {}
   };
 
@@ -164,6 +170,14 @@ class Game extends Component {
             }));
           }
         }),
+        this.gameRef.on("child_removed", data => {
+          if (initialDataLoaded) {
+            const key = data.key;
+            this.setState(prevState => ({
+              game: { ...prevState.game, [key]: null }
+            }));
+          }
+        }),
         this.gameRef.once("value").then(data => {
           let game = data.val();
           this.setState({ game });
@@ -230,7 +244,6 @@ class Game extends Component {
         }),
         this.trickRef.on("child_changed", data => {
           const trick = data.val();
-          console.log(`$$>>>>: Game -> trick`, trick);
           this.setState(prevState => {
             const newTricks = [...prevState.tricks];
             const trickIndex = newTricks.findIndex(
@@ -238,11 +251,23 @@ class Game extends Component {
             );
             newTricks[trickIndex] = trick;
             const score = this.getScore(newTricks);
-            return {
+            const newState = {
               tricks: newTricks,
               score
             };
+            if (trick.winner) {
+              newState.winner = trick.winner;
+            }
+            return newState;
           });
+        }),
+        this.trickRef.once("value").then(data => {
+          const tricks = data.val();
+          let trickIndex = Object.values(tricks || {}).length - 1;
+          if (trickIndex === -1) {
+            trickIndex = 0;
+          }
+          this.setState({ trickIndex });
         })
       ]);
     } catch (error) {
@@ -252,6 +277,7 @@ class Game extends Component {
 
   addPlayer = async () => {
     try {
+      this.setState({ loading: true });
       const { gameId } = this.props;
       const { playerName } = this.state;
       const playerRef = ref("players").push();
@@ -265,13 +291,16 @@ class Game extends Component {
       localStorage.setItem(`oh-shit-game-${gameId}-player-id`, playerId);
       this.setState({ playerId });
       this.listenToHand(playerId);
+      this.setState({ loading: false });
     } catch (error) {
+      this.setState({ loading: false });
       console.error(`$$>>>>: Game -> addPlayer -> error`, error);
     }
   };
 
   startGame = async () => {
     try {
+      this.setState({ loading: true });
       const { gameId } = this.props;
       let { players } = this.state;
       const response = await fetch(
@@ -284,13 +313,14 @@ class Game extends Component {
           body: JSON.stringify({ gameId, players })
         }
       );
+      this.setState({ loading: false });
     } catch (error) {
+      this.setState({ loading: false });
       console.error(`$$>>>>: Game -> startGame -> error`, error);
     }
   };
 
-  isLegal = ({ hand, card, game }) => {
-    const { leadSuit } = game;
+  isLegal = ({ hand, card, leadSuit }) => {
     if (!leadSuit) return true;
     const hasSuit = hand.some(c => c.suit === leadSuit);
     if (hasSuit) {
@@ -320,7 +350,6 @@ class Game extends Component {
     return tricks.reduce((scoreObj, tr) => {
       const newScoreObj = { ...scoreObj };
       if (tr.winner) {
-        console.log(`$$>>>>: tr.winner`, tr.winner);
         if (!newScoreObj[tr.winner]) {
           newScoreObj[tr.winner] = 0;
         }
@@ -342,23 +371,27 @@ class Game extends Component {
 
   playCard = async card => {
     try {
-      const { game, hand, tricks, playerId } = this.state;
+      this.setState({ loading: true });
+      const { game, hand, tricks, trickIndex, playerId } = this.state;
+      const trick = tricks[trickIndex];
+      let leadSuit;
+      if (!trick.cards || !Object.values(trick.cards).length) {
+        leadSuit = card.suit;
+      }
       if (
         game &&
         game.status === "play" &&
         game.currentPlayer &&
         game.currentPlayer === playerId &&
-        this.isLegal({ hand, card, game })
+        this.isLegal({ hand, card, leadSuit })
       ) {
-        const leadSuit = !Object.values(trick || {}).length && card.suit;
-        const trick = tricks[tricks.length - 1];
         const allCards = [...Object.values(trick.cards || {}), card];
         const allCardsIn = allCards.length === game.numPlayers;
 
         let leader = this.calculateLeader({
           cards: allCards,
           trump: game.trump,
-          leadSuit: leadSuit || game.leadSuit
+          leadSuit: leadSuit || trick.leadSuit
         });
         if (leader) {
           leader = leader.playerId;
@@ -384,10 +417,10 @@ class Game extends Component {
             })
           }
         );
-      } else {
-        console.log("NO ALLOWED");
       }
+      this.setState({ loading: false });
     } catch (error) {
+      this.setState({ loading: false });
       console.error(`$$>>>>: Game -> error`, error);
     }
     const { game, playerId } = this.state;
@@ -395,6 +428,7 @@ class Game extends Component {
 
   submitBid = async () => {
     try {
+      this.setState({ loading: true });
       const { gameId } = this.props;
       const { bid, playerId, game, bids, players } = this.state;
       const { numPlayers, round } = game;
@@ -417,8 +451,9 @@ class Game extends Component {
           })
         }
       );
-      this.setState({ bid: "" });
+      this.setState({ bid: "", loading: false });
     } catch (error) {
+      this.setState({ loading: false });
       console.error(`$$>>>>: Game -> error`, error);
     }
   };
@@ -432,6 +467,16 @@ class Game extends Component {
     }
   };
 
+  getWinner = playerId =>
+    this.state.players.find(p => p.playerId === playerId).name;
+
+  closeModal = e => {
+    this.setState(prevState => ({
+      trickIndex: prevState.trickIndex + 1,
+      winner: null
+    }));
+  };
+
   render() {
     const {
       game,
@@ -443,18 +488,23 @@ class Game extends Component {
       bid,
       bids,
       tricks,
-      score
+      trickIndex,
+      score,
+      loading,
+      winner
     } = this.state;
     let name, status, trump, currentPlayer, leadSuit;
     if (game) {
       name = game.name;
       status = game.status;
       trump = game.trump;
-      leadSuit = game.leadSuit;
       currentPlayer = game.currentPlayer;
     }
 
-    const trick = tricks[tricks.length - 1];
+    const trick = tricks[trickIndex];
+    if (trick) {
+      leadSuit = trick.leadSuit;
+    }
     return (
       <>
         <Container className={styles.game_page}>
@@ -599,6 +649,15 @@ class Game extends Component {
           )}
         </Container>
         <CardRow cards={hand} playCard={this.playCard} />
+        <Modal isOpen={Boolean(winner)} toggle={this.closeModal}>
+          <ModalBody>
+            <Container>
+              {winner && <h2>{`${this.getWinner(winner)} won!`}</h2>}
+              <Button onClick={this.closeModal}>CLOSE</Button>
+            </Container>
+          </ModalBody>
+        </Modal>
+        <Spinner loading={loading} />
       </>
     );
   }
