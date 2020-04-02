@@ -2,7 +2,7 @@ const functions = require("firebase-functions");
 const express = require("express");
 const cors = require("cors");
 const admin = require("firebase-admin");
-const { startGame } = require("./game");
+const { startGame, submitBid, playCard } = require("./game");
 
 admin.initializeApp();
 
@@ -19,5 +19,7 @@ app.use((req, res, next) => {
 });
 
 app.post("/start-game", startGame);
+app.post("/submit-bid", submitBid);
+app.post("/play-card", playCard);
 
 exports.api = functions.https.onRequest(app);
