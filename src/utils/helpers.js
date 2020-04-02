@@ -13,3 +13,18 @@ export const absoluteUrl = (req, setLocalhost) => {
     origin: protocol + "//" + host
   };
 };
+
+export const getColor = suit =>
+  suit === "C" || suit === "S" ? "#000" : "#db0007";
+export const getSource = suit => {
+  switch (suit) {
+    case "C":
+      return "/images/club.png";
+    case "H":
+      return "/images/heart.png";
+    case "S":
+      return "/images/spade.png";
+    case "D":
+      return "/images/diamond.png";
+  }
+};
