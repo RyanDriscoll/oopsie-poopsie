@@ -378,6 +378,9 @@ class Game extends Component {
       if (!trick.cards || !Object.values(trick.cards).length) {
         leadSuit = card.suit;
       }
+      if (trick.leadSuit) {
+        leadSuit = trick.leadSuit;
+      }
       if (
         game &&
         game.status === "play" &&
