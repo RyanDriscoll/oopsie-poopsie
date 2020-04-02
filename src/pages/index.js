@@ -49,7 +49,7 @@ const CreateGame = ({ router, origin }) => {
       updateObj[`players/${playerId}/host`] = true;
       updateObj[`players/${playerId}/playerId`] = playerId;
       await ref().update(updateObj);
-      localStorage.setItem("oh-shit-player-id", playerId);
+      localStorage.setItem(`oh-shit-game-${gameId}-player-id`, playerId);
       setGameId(gameId);
       setUrl(`${origin}/game/${gameId}`);
       setName("");
