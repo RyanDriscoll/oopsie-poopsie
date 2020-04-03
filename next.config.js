@@ -1,8 +1,5 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable global-require */
-/* eslint-disable import/no-extraneous-dependencies */
-// const withCSS = require("@zeit/next-css");
-const webpack = require("webpack");
 const dotenv = require("dotenv");
 
 dotenv.config({ path: ".env.build" });
