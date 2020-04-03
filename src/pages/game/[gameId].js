@@ -461,12 +461,12 @@ class Game extends Component {
       players,
       bids,
       roundScore,
-      game: { score }
+      game: { score, roundId }
     } = this.state
     const newGameScore = { ...score }
     players.forEach(player => {
       let newScore = roundScore[player.playerId] || 0
-      if (bids[player.playerId] === newScore) {
+      if (bids[roundId][player.playerId] === newScore) {
         newScore += 10
       }
       if (newGameScore[player.playerId]) {
@@ -497,31 +497,27 @@ class Game extends Component {
       }
       const gameScore = this.calculateGameScore()
 
-      if (numRounds === roundNum) {
-        this.setState(prevState => ({
-          game: { ...prevState.game, score: gameScore },
-          showScore: true
-        }))
-      } else {
-        await fetch(
-          `https://us-central1-oh-shit-ac7c3.cloudfunctions.net/api/next-round`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              roundNum,
-              numRounds,
-              numCards,
-              descending,
-              players,
-              gameId,
-              gameScore
-            })
-          }
-        )
-      }
+      const gameOver = numRounds === roundNum
+
+      await fetch(
+        `https://us-central1-oh-shit-ac7c3.cloudfunctions.net/api/next-round`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            roundNum,
+            numRounds,
+            numCards,
+            descending,
+            players,
+            gameId,
+            gameScore,
+            gameOver
+          })
+        }
+      )
     } catch (error) {}
   }
 
@@ -531,7 +527,7 @@ class Game extends Component {
       const { gameId } = this.props
       const { bid, playerId, game, bids, players } = this.state
       const { numPlayers, roundId } = game
-      const allBidsIn = (Object.keys(bids).length = numPlayers)
+      const allBidsIn = (Object.keys(bids[roundId] || {}).length = numPlayers)
       const nextPlayerId = this.getNextPlayer()
       const response = await fetch(
         `https://us-central1-oh-shit-ac7c3.cloudfunctions.net/api/submit-bid`,
