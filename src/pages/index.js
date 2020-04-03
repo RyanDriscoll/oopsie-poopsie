@@ -1,70 +1,69 @@
-import React, { useState, useRef } from "react";
-import Link from "next/link";
-import Container from "reactstrap/lib/Container";
-import Button from "reactstrap/lib/Button";
-import Form from "reactstrap/lib/Form";
-import FormGroup from "reactstrap/lib/FormGroup";
-import Label from "reactstrap/lib/Label";
-import Input from "reactstrap/lib/Input";
-import InputGroup from "reactstrap/lib/InputGroup";
-import InputGroupAddon from "reactstrap/lib/InputGroupAddon";
-import InputGroupText from "reactstrap/lib/InputGroupText";
-import Row from "reactstrap/lib/Row";
-import { ref } from "../lib/firebase";
-import { withRouter } from "next/router";
-import { absoluteUrl } from "../utils/helpers";
-import styles from "../styles/pages/home.module.scss";
-import { CopyIcon } from "../components/Icons";
+import React, { useState, useRef } from "react"
+import Link from "next/link"
+import Container from "reactstrap/lib/Container"
+import Button from "reactstrap/lib/Button"
+import Form from "reactstrap/lib/Form"
+import FormGroup from "reactstrap/lib/FormGroup"
+import Label from "reactstrap/lib/Label"
+import Input from "reactstrap/lib/Input"
+import InputGroup from "reactstrap/lib/InputGroup"
+import InputGroupAddon from "reactstrap/lib/InputGroupAddon"
+import Row from "reactstrap/lib/Row"
+import { ref } from "../lib/firebase"
+import { withRouter } from "next/router"
+import { absoluteUrl } from "../utils/helpers"
+import styles from "../styles/pages/home.module.scss"
+import { CopyIcon } from "../components/Icons"
 
-const CreateGame = ({ router, origin }) => {
-  const [name, setName] = useState("");
-  const [game, setGame] = useState("");
-  const [gameId, setGameId] = useState("");
-  const [url, setUrl] = useState("");
-  const [copySuccess, setCopySuccess] = useState("");
+const CreateGame = ({ origin }) => {
+  const [name, setName] = useState("")
+  const [game, setGame] = useState("")
+  const [gameId, setGameId] = useState("")
+  const [url, setUrl] = useState("")
+  const [copySuccess, setCopySuccess] = useState("")
 
-  const gameUrlRef = useRef(null);
+  const gameUrlRef = useRef(null)
 
   const handleChange = e => {
-    const { name, value } = e.target;
+    const { name, value } = e.target
     if (name === "name") {
-      setName(value);
+      setName(value)
     } else {
-      setGame(value);
+      setGame(value)
     }
-  };
+  }
 
   const newGame = async e => {
     try {
-      const newGameRef = ref("games").push();
-      const gameId = newGameRef.key;
-      const playerRef = ref(`players`).push();
-      const playerId = playerRef.key;
-      const updateObj = {};
-      updateObj[`games/${gameId}/name`] = game;
-      updateObj[`games/${gameId}/gameId`] = gameId;
-      updateObj[`games/${gameId}/status`] = "pending";
-      updateObj[`players/${playerId}/name`] = name;
-      updateObj[`players/${playerId}/gameId`] = gameId;
-      updateObj[`players/${playerId}/host`] = true;
-      updateObj[`players/${playerId}/playerId`] = playerId;
-      await ref().update(updateObj);
-      localStorage.setItem(`oh-shit-game-${gameId}-player-id`, playerId);
-      setGameId(gameId);
-      setUrl(`${origin}/game/${gameId}`);
-      setName("");
-      setGame("");
+      const newGameRef = ref("games").push()
+      const gameId = newGameRef.key
+      const playerRef = ref(`players`).push()
+      const playerId = playerRef.key
+      const updateObj = {}
+      updateObj[`games/${gameId}/name`] = game
+      updateObj[`games/${gameId}/gameId`] = gameId
+      updateObj[`games/${gameId}/status`] = "pending"
+      updateObj[`players/${playerId}/name`] = name
+      updateObj[`players/${playerId}/gameId`] = gameId
+      updateObj[`players/${playerId}/host`] = true
+      updateObj[`players/${playerId}/playerId`] = playerId
+      await ref().update(updateObj)
+      localStorage.setItem(`oh-shit-game-${gameId}-player-id`, playerId)
+      setGameId(gameId)
+      setUrl(`${origin}/game/${gameId}`)
+      setName("")
+      setGame("")
     } catch (error) {
-      console.error(`$$>>>>: newGame -> error`, error);
+      console.error(`$$>>>>: newGame -> error`, error)
     }
-  };
+  }
 
   const copyToClipboard = e => {
-    gameUrlRef.current.select();
-    document.execCommand("copy");
-    e.target.focus();
-    setCopySuccess("Copied!");
-  };
+    gameUrlRef.current.select()
+    document.execCommand("copy")
+    e.target.focus()
+    setCopySuccess("Copied!")
+  }
 
   return (
     <Container>
@@ -77,7 +76,7 @@ const CreateGame = ({ router, origin }) => {
             className="justify-content-center"
             style={{ position: "relative" }}
           >
-            <InputGroup>
+            <InputGroup style={{ maxWidth: 520 }}>
               <Input value={url} readOnly innerRef={gameUrlRef} />
               <InputGroupAddon addonType="append">
                 <Button onClick={copyToClipboard}>
@@ -119,12 +118,12 @@ const CreateGame = ({ router, origin }) => {
         </Form>
       )}
     </Container>
-  );
-};
+  )
+}
 
 CreateGame.getInitialProps = ({ req, res }) => {
-  const { origin } = absoluteUrl(req, "localhost:3000");
-  return { origin };
-};
+  const { origin } = absoluteUrl(req, "localhost:3000")
+  return { origin }
+}
 
-export default withRouter(CreateGame);
+export default withRouter(CreateGame)
