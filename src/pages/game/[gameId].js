@@ -547,7 +547,6 @@ class Game extends Component {
       playerId,
       game: { roundId }
     } = this.state
-    console.log(`$$>>>>: closeScoreModal -> roundId`, roundId)
     this.listenToRound(roundId)
     this.listenToHand({ playerId, roundId })
     this.setState({
