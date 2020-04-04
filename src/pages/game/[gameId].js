@@ -26,10 +26,12 @@ import {
   isLegal,
   getScore,
   calculateGameScore,
-  getWinner
+  getWinner,
+  getAvailableTricks
 } from "../../utils/helpers"
 import Spinner from "../../components/Spinner"
 import Players from "../../components/Players"
+import { withRouter } from "next/router"
 
 class Game extends Component {
   state = {
@@ -479,7 +481,7 @@ class Game extends Component {
         descending: desc,
         gameId,
         numRounds,
-        dealer: pastDealer,
+        dealer,
         score,
         roundId
       } = game
@@ -497,16 +499,7 @@ class Game extends Component {
         score
       })
 
-      const gameOver = numRounds === roundNum
-
-      const newDealerIndex =
-        players.findIndex(p => p.playerId === pastDealer) + 1
-      const dealer = players[newDealerIndex]
-        ? players[newDealerIndex].playerId
-        : players[0].playerId
-      const nextPlayerId = players[newDealerIndex + 1]
-        ? players[newDealerIndex + 1].playerId
-        : players[0].playerId
+      const gameOver = roundNum > numRounds
 
       await fetch(
         `https://us-central1-oh-shit-ac7c3.cloudfunctions.net/api/next-round`,
@@ -524,7 +517,6 @@ class Game extends Component {
             gameId,
             gameScore,
             gameOver,
-            nextPlayerId,
             dealer
           })
         }
@@ -566,9 +558,28 @@ class Game extends Component {
     }
   }
 
+  handleDirtyGame = value => {
+    const { game, bids } = this.state
+    if (game.dirty) {
+      const wouldMakeClean = getAvailableTricks({
+        numCards: game.numCards,
+        bids
+      })
+      if (wouldMakeClean < 0) {
+        return true
+      }
+      return wouldMakeClean.toString() !== value
+    }
+    return true
+  }
+
   handleChange = e => {
     let { value, name } = e.target
-    if (name !== "bid" || value === "" || /^(?:[0-9]|[1-9]|10)$/.test(value)) {
+    if (
+      name !== "bid" ||
+      value === "" ||
+      (/^(?:[0-9]|[1-9]|10)$/.test(value) && this.handleDirtyGame(value))
+    ) {
       this.setState({
         [name]: value
       })
@@ -613,7 +624,16 @@ class Game extends Component {
       showScore,
       trump
     } = this.state
-    let name, status, currentPlayer, leadSuit, roundId, gameScore, dealer
+    let name,
+      status,
+      currentPlayer,
+      leadSuit,
+      roundId,
+      gameScore,
+      dealer,
+      roundNum,
+      numRounds,
+      numCards
     if (game) {
       name = game.name
       status = game.status
@@ -621,20 +641,24 @@ class Game extends Component {
       roundId = game.roundId
       gameScore = game.score
       dealer = game.dealer
+      roundNum = game.roundNum
+      numRounds = game.numRounds
+      numCards = game.numCards
     }
 
     const trick = tricks[trickIndex]
     if (trick) {
       leadSuit = trick.leadSuit
     }
+
     return (
       <>
         <Container className={styles.game_page}>
           <Row className="mb-5" style={{ height: 65 }}>
-            <Col sm="4">
+            <Col xs="4">
               {name && <h2 style={{ textDecoration: "underline" }}>{name}</h2>}
             </Col>
-            <Col sm="4">
+            <Col xs="4">
               {isHost && status && status === "pending" && (
                 <Row>
                   <Button color="success" onClick={this.startGame}>
@@ -642,8 +666,27 @@ class Game extends Component {
                   </Button>
                 </Row>
               )}
+              {status &&
+                (status === "bid" ||
+                  status === "play" ||
+                  status === "over") && (
+                  <div className="d-flex-column justify-content-center">
+                    <h3
+                      style={{ fontSize: 12 }}
+                    >{`ROUND: ${roundNum} of ${numRounds}`}</h3>
+                    <h3
+                      style={{ fontSize: 12 }}
+                    >{`TOTAL TRICKS: ${numCards}`}</h3>
+                    <h3
+                      style={{ fontSize: 12 }}
+                    >{`TRICKS AVAILABLE: ${getAvailableTricks({
+                      numCards,
+                      bids
+                    })}`}</h3>
+                  </div>
+                )}
             </Col>
-            <Col sm="4">
+            <Col xs="4">
               <Row className="justify-content-end align-items-center">
                 {leadSuit && (
                   <>
@@ -670,20 +713,8 @@ class Game extends Component {
               </Row>
             </Col>
           </Row>
-          <Players
-            players={players}
-            currentPlayer={currentPlayer}
-            bids={bids}
-            roundScore={roundScore}
-            trick={trick}
-            bid={bid}
-            dealer={dealer}
-            handleChange={this.handleChange}
-            submitBid={this.submitBid}
-            thisPlayer={playerId}
-          />
           {!playerId && (
-            <Col sm="4">
+            <Col xs="4" className="mb-5">
               <Row>
                 <Form>
                   <FormGroup>
@@ -696,21 +727,35 @@ class Game extends Component {
                       onChange={this.handleChange}
                     />
                   </FormGroup>
-                  <Button onClick={this.addPlayer}>JOIN</Button>
+                  <Button color="success" onClick={this.addPlayer}>
+                    JOIN
+                  </Button>
                 </Form>
               </Row>
             </Col>
           )}
+          <Players
+            players={players}
+            currentPlayer={currentPlayer}
+            bids={bids}
+            roundScore={roundScore}
+            trick={trick}
+            bid={bid}
+            dealer={dealer}
+            handleChange={this.handleChange}
+            submitBid={this.submitBid}
+            thisPlayer={playerId}
+          />
         </Container>
         <CardRow cards={hand} playCard={this.playCard} />
         <Modal
           isOpen={Boolean(winner)}
           toggle={this.closeModal}
-          // onOpened={() => {
-          //   setTimeout(() => {
-          //     this.closeModal()
-          //   }, 1000)
-          // }}
+          onOpened={() => {
+            setTimeout(() => {
+              this.closeModal()
+            }, 2000)
+          }}
         >
           <ModalBody>
             <Container>
@@ -719,16 +764,21 @@ class Game extends Component {
             </Container>
           </ModalBody>
         </Modal>
-        <Modal isOpen={showScore} toggle={this.closeModal}>
+        <Modal isOpen={showScore || status === "over"} toggle={this.closeModal}>
           <ModalBody>
             <Container>
+              <Row>
+                <Col className="d-flex justify-content-center mb-3">
+                  <h3>SCORES</h3>
+                </Col>
+              </Row>
               {players.map(player => (
                 <Row key={player.playerId}>
-                  <Col sm="6">
+                  <Col xs="6">
                     <h5>{player.name}</h5>
                   </Col>
-                  <Col sm="6">
-                    <h5>
+                  <Col xs="6">
+                    <h5 style={{ textAlign: "center" }}>
                       {gameScore && gameScore[player.playerId]
                         ? gameScore[player.playerId]
                         : "0"}
@@ -736,7 +786,24 @@ class Game extends Component {
                   </Col>
                 </Row>
               ))}
-              <Button onClick={this.closeModal}>CLOSE</Button>
+              <Row>
+                <Col className="d-flex justify-content-center mt-3">
+                  {status === "over" ? (
+                    <Button
+                      color="success"
+                      onClick={() => {
+                        this.props.router.push("/")
+                      }}
+                    >
+                      NEW GAME
+                    </Button>
+                  ) : (
+                    <Button color="primary" onClick={this.closeModal}>
+                      CLOSE
+                    </Button>
+                  )}
+                </Col>
+              </Row>
             </Container>
           </ModalBody>
         </Modal>
@@ -755,4 +822,4 @@ Game.getInitialProps = context => {
   return { gameId }
 }
 
-export default Game
+export default withRouter(Game)
