@@ -35,7 +35,7 @@ const Players = ({
               })}
             >
               <Row>
-                <Col sm="4">
+                <Col xs="4">
                   <h2
                     className={classNames({
                       [styles.current_player]: isCurrent,
@@ -48,14 +48,14 @@ const Players = ({
                 </Col>
                 {bids && bids[playerId] != null ? (
                   <>
-                    <Col sm="2">
+                    <Col xs="2">
                       <h2>{`Bid: ${bids[playerId]}`}</h2>
                     </Col>
-                    <Col sm="2">
+                    <Col xs="2">
                       <h2>{`Won: ${roundScore[playerId] || "0"}`}</h2>
                     </Col>
                     {trick && trick.cards && trick.cards[playerId] && (
-                      <Col sm="2">
+                      <Col xs="2">
                         <div className={styles.card}>
                           <img src={getSource(trick.cards[playerId].suit)} />
                           <h2
@@ -70,7 +70,7 @@ const Players = ({
                     )}
                   </>
                 ) : (
-                  <Col sm="2">
+                  <Col xs="2">
                     {thisPlayer === playerId && currentPlayer === playerId && (
                       <Form>
                         <InputGroup>

@@ -24,6 +24,7 @@ ul.players {
       padding: 0;
       margin: 0;
       display: inline-block;
+      position: relative;
     }
 
     .dealer {
@@ -34,8 +35,8 @@ ul.players {
         color: $red;
         font-family: $font-bold;
         font-size: 10px;
-        padding-left: 25px;
-        line-height: 2.45;
+        padding-left: 22px;
+        line-height: 2.6;
       }
     }
 
