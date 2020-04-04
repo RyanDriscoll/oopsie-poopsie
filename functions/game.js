@@ -28,10 +28,13 @@ exports.startGame = async (req, res) => {
 
     const trump = deck.deal().suit
     const randomIndex = Math.floor(Math.random() * numPlayers)
-    const currentPlayer = players[randomIndex].playerId
-
-    const dealer =
-      players[randomIndex === 0 ? players.length - 1 : randomIndex - 1].playerId
+    const dealer = players[randomIndex]
+    let currentPlayerIndex = randomIndex + 1
+    let currentPlayer = players[currentPlayerIndex]
+    if (!currentPlayer) {
+      currentPlayerIndex = 0
+      currentPlayer = players[currentPlayerIndex]
+    }
 
     const roundRef = ref("rounds").push()
     const roundKey = roundRef.key
@@ -47,8 +50,8 @@ exports.startGame = async (req, res) => {
     updateObj[`games/${gameId}/roundId`] = roundKey
     updateObj[`games/${gameId}/roundNum`] = 1
     updateObj[`games/${gameId}/numRounds`] = numCards * 2 - 1
-    updateObj[`games/${gameId}/currentPlayer`] = currentPlayer
-    updateObj[`games/${gameId}/dealer`] = dealer
+    updateObj[`games/${gameId}/currentPlayer`] = currentPlayer.playerId
+    updateObj[`games/${gameId}/dealer`] = dealer.playerId
     updateObj[`games/${gameId}/status`] = "bid"
     updateObj[`rounds/${roundKey}/roundId`] = roundKey
     updateObj[`rounds/${roundKey}/trump`] = trump
@@ -150,8 +153,7 @@ exports.nextRound = async (req, res) => {
       gameId,
       gameScore,
       gameOver,
-      dealer,
-      nextPlayerId
+      dealer
     } = body
     const updateObj = {}
 
@@ -173,6 +175,20 @@ exports.nextRound = async (req, res) => {
         })
       }
 
+      const formerDealerIndex = players.findIndex(p => p.playerId === dealer)
+      let dealerIndex = formerDealerIndex + 1
+      let newDealer = players[dealerIndex]
+      if (!newDealer) {
+        dealerIndex = 0
+        newDealer = players[dealerIndex]
+      }
+      let newCurrentPlayerIndex = dealerIndex + 1
+      let newCurrentPlayer = players[newCurrentPlayerIndex]
+      if (!newCurrentPlayer) {
+        newCurrentPlayerIndex = 0
+        newCurrentPlayer = players[newCurrentPlayerIndex]
+      }
+
       const trump = deck.deal().suit
       const roundRef = ref("rounds").push()
       const roundKey = roundRef.key
@@ -186,8 +202,8 @@ exports.nextRound = async (req, res) => {
       updateObj[`games/${gameId}/numCards`] = numCards
       updateObj[`games/${gameId}/descending`] = descending
       updateObj[`games/${gameId}/score`] = gameScore
-      updateObj[`games/${gameId}/dealer`] = dealer
-      updateObj[`games/${gameId}/currentPlayer`] = nextPlayerId
+      updateObj[`games/${gameId}/dealer`] = newDealer.playerId
+      updateObj[`games/${gameId}/currentPlayer`] = newCurrentPlayer.playerId
       updateObj[`rounds/${roundKey}/roundId`] = roundKey
       updateObj[`rounds/${roundKey}/trump`] = trump
       updateObj[`rounds/${roundKey}/gameId`] = gameId
