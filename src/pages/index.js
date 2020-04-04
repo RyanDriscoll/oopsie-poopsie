@@ -14,6 +14,7 @@ import { withRouter } from "next/router"
 import { absoluteUrl } from "../utils/helpers"
 import styles from "../styles/pages/home.module.scss"
 import { CopyIcon } from "../components/Icons"
+import Col from "reactstrap/lib/Col"
 
 const CreateGame = ({ origin }) => {
   const [name, setName] = useState("")
@@ -76,15 +77,17 @@ const CreateGame = ({ origin }) => {
             className="justify-content-center"
             style={{ position: "relative" }}
           >
-            <InputGroup style={{ maxWidth: 520 }}>
-              <Input value={url} readOnly innerRef={gameUrlRef} />
-              <InputGroupAddon addonType="append">
-                <Button onClick={copyToClipboard}>
-                  <CopyIcon style={{ width: 18 }} />
-                </Button>
-              </InputGroupAddon>
-            </InputGroup>
-            <h6 className={styles.copied}>{copySuccess}</h6>
+            <Col sm="7">
+              <InputGroup>
+                <Input value={url} readOnly innerRef={gameUrlRef} />
+                <InputGroupAddon addonType="append">
+                  <Button onClick={copyToClipboard}>
+                    <CopyIcon style={{ width: 18 }} />
+                  </Button>
+                </InputGroupAddon>
+              </InputGroup>
+              <h6 className={styles.copied}>{copySuccess}</h6>
+            </Col>
           </Row>
           <Row className="justify-content-center m-5">
             <Link href={"/game/[gameId]"} as={`/game/${gameId}`}>
@@ -93,29 +96,33 @@ const CreateGame = ({ origin }) => {
           </Row>
         </>
       ) : (
-        <Form>
-          <FormGroup>
-            <Label for="game">Game Name</Label>
-            <Input
-              type="text"
-              name="game"
-              id="game"
-              value={game}
-              onChange={handleChange}
-            />
-          </FormGroup>
-          <FormGroup>
-            <Label for="game">User Name</Label>
-            <Input
-              type="text"
-              name="name"
-              id="name"
-              value={name}
-              onChange={handleChange}
-            />
-          </FormGroup>
-          <Button onClick={newGame}>NEW GAME</Button>
-        </Form>
+        <Row className="justify-content-center">
+          <Col sm="6">
+            <Form>
+              <FormGroup>
+                <Label for="game">Game Name</Label>
+                <Input
+                  type="text"
+                  name="game"
+                  id="game"
+                  value={game}
+                  onChange={handleChange}
+                />
+              </FormGroup>
+              <FormGroup>
+                <Label for="game">User Name</Label>
+                <Input
+                  type="text"
+                  name="name"
+                  id="name"
+                  value={name}
+                  onChange={handleChange}
+                />
+              </FormGroup>
+              <Button onClick={newGame}>NEW GAME</Button>
+            </Form>
+          </Col>
+        </Row>
       )}
     </Container>
   )
