@@ -95,3 +95,6 @@ export const calculateGameScore = ({ players, bids, roundScore, score }) => {
   })
   return newGameScore
 }
+
+export const getAvailableTricks = ({ numCards, bids }) =>
+  numCards - Object.values(bids || {}).reduce((num, bid) => num + bid, 0)
