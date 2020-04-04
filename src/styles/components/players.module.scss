@@ -1,0 +1,73 @@
+@import "../global/variables.scss";
+
+ul.players {
+  list-style: none;
+  padding: 0;
+
+  li {
+    position: relative;
+    margin-bottom: 25px;
+    height: 55px;
+
+    &.current_player_arrow {
+      &::before {
+        position: absolute;
+        content: "-->";
+        left: -6%;
+        color: $red;
+        font-family: $font-bold;
+        font-size: 25px;
+      }
+    }
+
+    h2 {
+      padding: 0;
+      margin: 0;
+      display: inline-block;
+    }
+
+    .dealer {
+      &::after {
+        position: absolute;
+        content: "dealer";
+        bottom: 0;
+        color: $red;
+        font-family: $font-bold;
+        font-size: 10px;
+        padding-left: 25px;
+        line-height: 2.45;
+      }
+    }
+
+    .current_player {
+      padding: 0 20px;
+      background-color: black;
+      color: white;
+      font-style: italic;
+    }
+
+    .not_present {
+      opacity: 0.5;
+      font-style: italic;
+    }
+
+    .card {
+      display: flex;
+      flex-direction: row;
+      height: 100%;
+      justify-content: flex-start;
+      align-items: center;
+      border: none;
+      padding-bottom: 8px;
+
+      h2 {
+        margin: 0 0 0 5px;
+      }
+
+      img {
+        width: 3vw;
+        object-fit: contain;
+      }
+    }
+  }
+}

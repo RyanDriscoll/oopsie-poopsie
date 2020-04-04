@@ -18,8 +18,18 @@ import CombinedContext from "../../context/CombinedContext"
 import { ref } from "../../lib/firebase"
 import styles from "../../styles/pages/game.module.scss"
 import CardRow from "../../components/CardRow"
-import { getSource, getColor } from "../../utils/helpers"
+import {
+  getSource,
+  getColor,
+  calculateLeader,
+  getNextPlayer,
+  isLegal,
+  getScore,
+  calculateGameScore,
+  getWinner
+} from "../../utils/helpers"
 import Spinner from "../../components/Spinner"
+import Players from "../../components/Players"
 
 class Game extends Component {
   state = {
@@ -150,12 +160,10 @@ class Game extends Component {
   listenToGame = async ({ gameId, playerId }) => {
     try {
       this.gameRef = ref(`games/${gameId}`)
-      let initialDataLoaded = false
       await Promise.all([
         this.gameRef.on("child_added", data => {
           let value = data.val()
           const key = data.key
-
           if (key === "roundId") {
             this.listenToRound(value)
             this.listenToHand({ playerId, roundId: value })
@@ -167,12 +175,16 @@ class Game extends Component {
         this.gameRef.on("child_changed", data => {
           let value = data.val()
           const key = data.key
-          if (key === "roundId") {
-            this.setState({ showScore: true })
-          }
-          this.setState(prevState => ({
-            game: { ...prevState.game, [key]: value }
-          }))
+          this.setState(prevState =>
+            key === "roundId"
+              ? {
+                  showScore: true,
+                  game: { ...prevState.game, [key]: value }
+                }
+              : {
+                  game: { ...prevState.game, [key]: value }
+                }
+          )
         }),
         this.gameRef.on("child_removed", data => {
           const key = data.key
@@ -252,7 +264,7 @@ class Game extends Component {
             const trick = data.val()
             this.setState(prevState => {
               const newTricks = [...prevState.tricks, trick]
-              const roundScore = this.getScore(newTricks)
+              const roundScore = getScore(newTricks)
 
               return {
                 tricks: newTricks,
@@ -270,7 +282,7 @@ class Game extends Component {
                 t => t.trickId === trick.trickId
               )
               newTricks[trickIndex] = trick
-              const roundScore = this.getScore(newTricks)
+              const roundScore = getScore(newTricks)
               const newState = {
                 tricks: newTricks,
                 roundScore
@@ -342,59 +354,18 @@ class Game extends Component {
     }
   }
 
-  isLegal = ({ hand, card, leadSuit }) => {
-    if (!leadSuit) return true
-    const hasSuit = hand.some(c => c.suit === leadSuit)
-    if (hasSuit) {
-      return card.suit === leadSuit
-    }
-    return true
-  }
-
-  calculateLeader = ({ cards, trump, leadSuit }) =>
-    cards.sort((a, b) => {
-      if (a.suit === trump && b.suit !== trump) {
-        return -1
-      }
-      if (b.suit === trump && a.suit !== trump) {
-        return 1
-      }
-      if (a.suit === leadSuit && b.suit !== leadSuit) {
-        return -1
-      }
-      if (b.suit === leadSuit && a.suit !== leadSuit) {
-        return 1
-      }
-      return b.rank - a.rank
-    })[0]
-
-  getScore = tricks => {
-    return tricks.reduce((scoreObj, tr) => {
-      const newScoreObj = { ...scoreObj }
-      if (tr.winner) {
-        if (!newScoreObj[tr.winner]) {
-          newScoreObj[tr.winner] = 0
-        }
-        newScoreObj[tr.winner] += 1
-      }
-      return newScoreObj
-    }, {})
-  }
-
-  getNextPlayer = () => {
-    const { playerId, players } = this.state
-    const playerIndex = players.findIndex(p => p.playerId === playerId)
-    let nextPlayerIndex = playerIndex + 1
-    if (nextPlayerIndex === players.length) {
-      nextPlayerIndex = 0
-    }
-    return players[nextPlayerIndex].playerId
-  }
-
   playCard = async card => {
     try {
       this.setState({ loading: true })
-      const { game, hand, tricks, trickIndex, playerId, trump } = this.state
+      const {
+        game,
+        hand,
+        tricks,
+        trickIndex,
+        playerId,
+        players,
+        trump
+      } = this.state
       const trick = tricks[trickIndex]
       let leadSuit
       if (!trick.cards || !Object.values(trick.cards).length) {
@@ -408,13 +379,13 @@ class Game extends Component {
         game.status === "play" &&
         game.currentPlayer &&
         game.currentPlayer === playerId &&
-        this.isLegal({ hand, card, leadSuit })
+        isLegal({ hand, card, leadSuit })
       ) {
         const allCards = [...Object.values(trick.cards || {}), card]
         const allCardsIn = allCards.length === game.numPlayers
         const nextRound = allCardsIn && hand.length === 1
 
-        let leader = this.calculateLeader({
+        let leader = calculateLeader({
           cards: allCards,
           trump: trump[game.roundId],
           leadSuit: leadSuit || trick.leadSuit
@@ -422,7 +393,7 @@ class Game extends Component {
         if (leader) {
           leader = leader.playerId
         }
-        const nextPlayerId = this.getNextPlayer()
+        const nextPlayerId = getNextPlayer({ playerId, players })
         await fetch(
           `https://us-central1-oh-shit-ac7c3.cloudfunctions.net/api/play-card`,
           {
@@ -456,37 +427,18 @@ class Game extends Component {
     const { game, playerId } = this.state
   }
 
-  calculateGameScore = () => {
-    const {
-      players,
-      bids,
-      roundScore,
-      game: { score, roundId }
-    } = this.state
-    const newGameScore = { ...score }
-    players.forEach(player => {
-      let newScore = roundScore[player.playerId] || 0
-      if (bids[roundId][player.playerId] === newScore) {
-        newScore += 10
-      }
-      if (newGameScore[player.playerId]) {
-        newGameScore[player.playerId] += newScore
-      } else {
-        newGameScore[player.playerId] = newScore
-      }
-    })
-    return newGameScore
-  }
-
   nextRound = async () => {
     try {
-      const { game, players } = this.state
+      const { game, players, bids, roundScore } = this.state
       let {
         numCards: nc,
         roundNum: rn,
         descending: desc,
         gameId,
-        numRounds
+        numRounds,
+        dealer: pastDealer,
+        score,
+        roundId
       } = game
       let descending = desc
       const roundNum = rn + 1
@@ -495,9 +447,24 @@ class Game extends Component {
         descending = false
         numCards = 2
       }
-      const gameScore = this.calculateGameScore()
+      const gameScore = calculateGameScore({
+        players,
+        bids,
+        roundScore,
+        score,
+        roundId
+      })
 
       const gameOver = numRounds === roundNum
+
+      const newDealerIndex =
+        players.findIndex(p => p.playerId === pastDealer) + 1
+      const dealer = players[newDealerIndex]
+        ? players[newDealerIndex].playerId
+        : players[0].playerId
+      const nextPlayerId = players[newDealerIndex + 1]
+        ? players[newDealerIndex + 1].playerId
+        : players[0].playerId
 
       await fetch(
         `https://us-central1-oh-shit-ac7c3.cloudfunctions.net/api/next-round`,
@@ -514,11 +481,15 @@ class Game extends Component {
             players,
             gameId,
             gameScore,
-            gameOver
+            gameOver,
+            nextPlayerId,
+            dealer
           })
         }
       )
-    } catch (error) {}
+    } catch (error) {
+      console.error(`$$>>>>: nextRound -> error`, error)
+    }
   }
 
   submitBid = async () => {
@@ -528,7 +499,7 @@ class Game extends Component {
       const { bid, playerId, game, bids, players } = this.state
       const { numPlayers, roundId } = game
       const allBidsIn = (Object.keys(bids[roundId] || {}).length = numPlayers)
-      const nextPlayerId = this.getNextPlayer()
+      const nextPlayerId = getNextPlayer({ playerId, players })
       const response = await fetch(
         `https://us-central1-oh-shit-ac7c3.cloudfunctions.net/api/submit-bid`,
         {
@@ -562,9 +533,6 @@ class Game extends Component {
     }
   }
 
-  getWinner = playerId =>
-    this.state.players.find(p => p.playerId === playerId).name
-
   closeModal = e => {
     this.setState(prevState => {
       return {
@@ -579,6 +547,7 @@ class Game extends Component {
       playerId,
       game: { roundId }
     } = this.state
+    console.log(`$$>>>>: closeScoreModal -> roundId`, roundId)
     this.listenToRound(roundId)
     this.listenToHand({ playerId, roundId })
     this.setState({
@@ -604,13 +573,14 @@ class Game extends Component {
       showScore,
       trump
     } = this.state
-    let name, status, currentPlayer, leadSuit, roundId, gameScore
+    let name, status, currentPlayer, leadSuit, roundId, gameScore, dealer
     if (game) {
       name = game.name
       status = game.status
       currentPlayer = game.currentPlayer
       roundId = game.roundId
       gameScore = game.score
+      dealer = game.dealer
     }
 
     const trick = tricks[trickIndex]
@@ -621,10 +591,19 @@ class Game extends Component {
       <>
         <Container className={styles.game_page}>
           <Row className="mb-5">
-            <Col sm="6">
+            <Col sm="4">
               {name && <h2 style={{ textDecoration: "underline" }}>{name}</h2>}
             </Col>
-            <Col sm="6">
+            <Col sm="4">
+              {isHost && status && status === "pending" && (
+                <Row>
+                  <Button color="success" onClick={this.startGame}>
+                    START GAME
+                  </Button>
+                </Row>
+              )}
+            </Col>
+            <Col sm="4">
               <Row className="justify-content-end align-items-center">
                 {leadSuit && (
                   <>
@@ -651,114 +630,36 @@ class Game extends Component {
               </Row>
             </Col>
           </Row>
+          <Players
+            players={players}
+            currentPlayer={currentPlayer}
+            bids={bids[roundId]}
+            roundScore={roundScore}
+            trick={trick}
+            bid={bid}
+            dealer={dealer}
+            handleChange={this.handleChange}
+            submitBid={this.submitBid}
+            thisPlayer={playerId}
+          />
           {!playerId && (
-            <Row>
-              <Form>
-                <FormGroup>
-                  <Label for="name">User Name</Label>
-                  <Input
-                    type="text"
-                    name="playerName"
-                    id="name"
-                    value={playerName}
-                    onChange={this.handleChange}
-                  />
-                </FormGroup>
-                <Button onClick={this.addPlayer}>ADD PLAYER</Button>
-              </Form>
-            </Row>
-          )}
-          <ul>
-            {players.map(player => {
-              return (
-                <li
-                  key={player.playerId}
-                  className={
-                    currentPlayer === player.playerId
-                      ? styles.current_player_container
-                      : ""
-                  }
-                >
-                  <Row>
-                    <Col sm="4">
-                      <h2
-                        className={
-                          currentPlayer === player.playerId
-                            ? styles.current_player
-                            : ""
-                        }
-                        style={
-                          !player.present
-                            ? { opacity: 0.5, fontStyle: "italic" }
-                            : {}
-                        }
-                      >
-                        {player.name}
-                      </h2>
-                    </Col>
-                    {bids[roundId] && bids[roundId][player.playerId] != null ? (
-                      <>
-                        <Col sm="2">
-                          <h2>{`Bid: ${bids[roundId][player.playerId]}`}</h2>
-                        </Col>
-                        <Col sm="2">
-                          <h2>{`Won: ${roundScore[player.playerId] ||
-                            "0"}`}</h2>
-                        </Col>
-                        {trick && trick.cards && trick.cards[player.playerId] && (
-                          <Col sm="2">
-                            <div className={styles.card}>
-                              <img
-                                src={getSource(
-                                  trick.cards[player.playerId].suit
-                                )}
-                              />
-                              <h2
-                                style={{
-                                  color: getColor(
-                                    trick.cards[player.playerId].suit
-                                  )
-                                }}
-                              >
-                                {trick.cards[player.playerId].value}
-                              </h2>
-                            </div>
-                          </Col>
-                        )}
-                      </>
-                    ) : (
-                      <Col sm="2">
-                        {playerId === player.playerId &&
-                          currentPlayer === playerId && (
-                            <Form>
-                              <InputGroup>
-                                <Input
-                                  data-lpignore="true"
-                                  type="text"
-                                  value={bid}
-                                  name="bid"
-                                  id="bid"
-                                  onChange={this.handleChange}
-                                />
-                                <InputGroupAddon addonType="append">
-                                  <Button onClick={this.submitBid}>BID</Button>
-                                </InputGroupAddon>
-                              </InputGroup>
-                            </Form>
-                          )}
-                      </Col>
-                    )}
-                  </Row>
-                </li>
-              )
-            })}
-          </ul>
-          {isHost && status && status === "pending" && (
-            <Row>
-              <Button color="success" onClick={this.startGame}>
-                START GAME
-              </Button>
-            </Row>
+            <Col sm="4">
+              <Row>
+                <Form>
+                  <FormGroup>
+                    <Label for="name">User Name</Label>
+                    <Input
+                      type="text"
+                      name="playerName"
+                      id="name"
+                      value={playerName}
+                      onChange={this.handleChange}
+                    />
+                  </FormGroup>
+                  <Button onClick={this.addPlayer}>JOIN</Button>
+                </Form>
+              </Row>
+            </Col>
           )}
         </Container>
         <CardRow cards={hand} playCard={this.playCard} />
@@ -773,7 +674,7 @@ class Game extends Component {
         >
           <ModalBody>
             <Container>
-              {winner && <h2>{`${this.getWinner(winner)} won!`}</h2>}
+              {winner && <h2>{`${getWinner({ winner, players })} won!`}</h2>}
               <Button onClick={this.closeModal}>CLOSE</Button>
             </Container>
           </ModalBody>
