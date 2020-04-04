@@ -22,6 +22,7 @@ const CreateGame = ({ origin }) => {
   const [gameId, setGameId] = useState("")
   const [url, setUrl] = useState("")
   const [copySuccess, setCopySuccess] = useState("")
+  const [dirty, setDirty] = useState(false)
 
   const gameUrlRef = useRef(null)
 
@@ -34,7 +35,7 @@ const CreateGame = ({ origin }) => {
     }
   }
 
-  const newGame = async e => {
+  const newGame = async () => {
     try {
       const newGameRef = ref("games").push()
       const gameId = newGameRef.key
@@ -44,6 +45,7 @@ const CreateGame = ({ origin }) => {
       updateObj[`games/${gameId}/name`] = game
       updateObj[`games/${gameId}/gameId`] = gameId
       updateObj[`games/${gameId}/status`] = "pending"
+      updateObj[`games/${gameId}/dirty`] = dirty
       updateObj[`players/${playerId}/name`] = name
       updateObj[`players/${playerId}/gameId`] = gameId
       updateObj[`players/${playerId}/host`] = true
@@ -77,7 +79,7 @@ const CreateGame = ({ origin }) => {
             className="justify-content-center"
             style={{ position: "relative" }}
           >
-            <Col sm="7">
+            <Col xs="7">
               <InputGroup>
                 <Input value={url} readOnly innerRef={gameUrlRef} />
                 <InputGroupAddon addonType="append">
@@ -97,7 +99,7 @@ const CreateGame = ({ origin }) => {
         </>
       ) : (
         <Row className="justify-content-center">
-          <Col sm="6">
+          <Col xs="6">
             <Form>
               <FormGroup>
                 <Label for="game">Game Name</Label>
@@ -107,6 +109,7 @@ const CreateGame = ({ origin }) => {
                   id="game"
                   value={game}
                   onChange={handleChange}
+                  placeholder="optional"
                 />
               </FormGroup>
               <FormGroup>
@@ -119,7 +122,22 @@ const CreateGame = ({ origin }) => {
                   onChange={handleChange}
                 />
               </FormGroup>
-              <Button onClick={newGame}>NEW GAME</Button>
+              <FormGroup check>
+                <Label check>
+                  <Input
+                    type="checkbox"
+                    id="bid-checkbox"
+                    checked={dirty}
+                    onChange={e => setDirty(!dirty)}
+                  />{" "}
+                  No clean bids
+                </Label>
+              </FormGroup>
+              <div className="d-flex justify-content-center mt-3">
+                <Button disabled={!name} color="primary" onClick={newGame}>
+                  NEW GAME
+                </Button>
+              </div>
             </Form>
           </Col>
         </Row>
