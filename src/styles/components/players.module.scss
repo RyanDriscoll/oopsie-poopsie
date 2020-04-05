@@ -28,6 +28,10 @@ ul.players {
       position: relative;
     }
 
+    [data-player-score] {
+      position: relative;
+    }
+
     [data-player-score]::before,
     .dealer::after {
       position: absolute;
@@ -40,8 +44,9 @@ ul.players {
 
     [data-player-score]::before {
       content: attr(data-player-score);
-      padding-right: 45px;
-      left: 0;
+      width: 20px;
+      left: -23px;
+      text-align: right;
     }
 
     .dealer::after {

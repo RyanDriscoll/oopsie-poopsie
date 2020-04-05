@@ -20,7 +20,8 @@ const Players = ({
   submitBid,
   dealer,
   thisPlayer,
-  gameScore
+  gameScore,
+  status
 }) => {
   const thisPlayerIndex = players.findIndex(p => p.playerId === thisPlayer)
   const newPlayers = [
@@ -33,6 +34,11 @@ const Players = ({
         newPlayers.map(({ playerId, present, name }) => {
           const isCurrent = currentPlayer === playerId
           const isDealer = dealer === playerId
+          let playerScore =
+            gameScore && gameScore[playerId] ? gameScore[playerId] : "0"
+          if (!status || status === "pending") {
+            playerScore = ""
+          }
           return (
             <li
               key={playerId}
@@ -42,13 +48,7 @@ const Players = ({
             >
               <Row>
                 <Col xs="4">
-                  <div
-                    data-player-score={
-                      gameScore && gameScore[playerId]
-                        ? gameScore[playerId]
-                        : "0"
-                    }
-                  >
+                  <div data-player-score={playerScore}>
                     <h2
                       className={classNames({
                         [styles.current_player]: isCurrent,

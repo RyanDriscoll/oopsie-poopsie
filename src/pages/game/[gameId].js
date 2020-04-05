@@ -754,6 +754,7 @@ class Game extends Component {
             submitBid={this.submitBid}
             thisPlayer={playerId}
             gameScore={gameScore}
+            status={status}
           />
         </Container>
         <CardRow cards={hand} playCard={this.playCard} />
@@ -781,20 +782,38 @@ class Game extends Component {
                   <h3>SCORES</h3>
                 </Col>
               </Row>
-              {players.map(player => (
-                <Row key={player.playerId}>
-                  <Col xs="6">
-                    <h5>{player.name}</h5>
-                  </Col>
-                  <Col xs="6">
-                    <h5 style={{ textAlign: "center" }}>
-                      {gameScore && gameScore[player.playerId]
-                        ? gameScore[player.playerId]
-                        : "0"}
-                    </h5>
-                  </Col>
-                </Row>
-              ))}
+              {players
+                .sort((a, b) => {
+                  const aScore =
+                    gameScore && gameScore[a.playerId]
+                      ? gameScore[a.playerId]
+                      : 0
+                  const bScore =
+                    gameScore && gameScore[b.playerId]
+                      ? gameScore[b.playerId]
+                      : 0
+                  if (aScore < bScore) {
+                    return -1
+                  }
+                  if (aScore > bScore) {
+                    return 1
+                  }
+                  return 0
+                })
+                .map(player => (
+                  <Row key={player.playerId}>
+                    <Col xs="6">
+                      <h5>{player.name}</h5>
+                    </Col>
+                    <Col xs="6">
+                      <h5 style={{ textAlign: "center" }}>
+                        {gameScore && gameScore[player.playerId]
+                          ? gameScore[player.playerId]
+                          : "0"}
+                      </h5>
+                    </Col>
+                  </Row>
+                ))}
               <Row>
                 <Col className="d-flex justify-content-center mt-3">
                   {status === "over" ? (
