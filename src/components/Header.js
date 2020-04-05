@@ -32,7 +32,7 @@ const Header = () => {
           </Button>
         </div>
       </header>
-      <Modal isOpen={showRules} toggle={toggleRules}>
+      <Modal size="lg" isOpen={showRules} toggle={toggleRules}>
         <ModalHeader>
           <h1>rules</h1>
         </ModalHeader>
