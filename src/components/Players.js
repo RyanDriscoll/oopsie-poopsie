@@ -21,10 +21,15 @@ const Players = ({
   dealer,
   thisPlayer
 }) => {
+  const thisPlayerIndex = players.findIndex(p => p.playerId === thisPlayer)
+  const newPlayers = [
+    ...players.slice(thisPlayerIndex),
+    ...players.slice(0, thisPlayerIndex)
+  ]
   return (
     <ul className={styles.players}>
-      {players &&
-        players.map(({ playerId, present, name }) => {
+      {newPlayers &&
+        newPlayers.map(({ playerId, present, name }) => {
           const isCurrent = currentPlayer === playerId
           const isDealer = dealer === playerId
           return (
