@@ -662,6 +662,9 @@ class Game extends Component {
       leadSuit = trick.leadSuit
     }
 
+    const user = players.find(p => p.playerId === playerId)
+    const userName = (user && user.name) || ""
+
     return (
       <>
         <Container className={styles.game_page}>
@@ -855,6 +858,7 @@ class Game extends Component {
         <NotificationController
           showNotification={showYourTurn}
           onClose={() => this.setState({ showYourTurn: false })}
+          userName={userName}
         />
       </>
     )

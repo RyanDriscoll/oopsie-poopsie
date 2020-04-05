@@ -1,4 +1,4 @@
-import React from "react"
+import React, { createRef } from "react"
 import dynamic from "next/dynamic"
 // import Notification from "react-web-notification"
 const Notification = dynamic(() => import("react-web-notification"), {
@@ -9,24 +9,10 @@ class NotificationController extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      ignore: false,
-      title: "",
-      askAgain: true
+      ignore: false
     }
-  }
 
-  componentDidMount() {
-    window.Notification.requestPermission()
-  }
-
-  componentDidUpdate(prevProps) {
-    if (this.props.showNotification && !prevProps.showNotification) {
-      console.log("SHOW NOTIFICATION")
-      this.showNotification()
-    }
-    if (!this.props.showNotification && prevProps.showNotification) {
-      this.setState({ ignore: true, title: "" })
-    }
+    this.sound = createRef()
   }
 
   handlePermissionGranted = () => {
@@ -48,69 +34,43 @@ class NotificationController extends React.Component {
     })
   }
 
-  handleNotificationOnClick = (e, tag) => {
-    console.log(e, "Notification clicked tag:" + tag)
-  }
-
-  handleNotificationOnError = (e, tag) => {
-    console.log(e, "Notification error tag:" + tag)
-  }
-
   handleNotificationOnClose = (e, tag) => {
-    console.log(e, "Notification closed tag:" + tag)
     this.props.onClose()
   }
 
   handleNotificationOnShow = (e, tag) => {
     this.playSound()
-    console.log(e, "Notification shown tag:" + tag)
   }
 
   playSound = filename => {
-    document.getElementById("sound").play()
-  }
-
-  showNotification() {
-    if (this.state.ignore) {
-      return
+    if (this.sound) {
+      this.sound.play()
     }
-
-    const title = "your turn!"
-    const body = "go already..."
-    const icon = "/public/images/poop.png"
-    // const icon = 'http://localhost:3000/Notifications_button_24.png';
-
-    // Available options
-    // See https://developer.mozilla.org/en-US/docs/Web/API/Notification/Notification
-    const options = {
-      body: body,
-      icon: icon,
-      lang: "en",
-      dir: "ltr"
-    }
-    this.setState({
-      title: title,
-      options: options
-    })
   }
 
   render() {
-    return (
+    return this.props.showNotification ? (
       <div>
         <Notification
-          ignore={this.state.ignore && this.state.title !== ""}
+          ignore={this.state.ignore}
           notSupported={this.handleNotSupported}
           onPermissionGranted={this.handlePermissionGranted}
           onPermissionDenied={this.handlePermissionDenied}
           onShow={this.handleNotificationOnShow}
-          onClick={this.handleNotificationOnClick}
           onClose={this.handleNotificationOnClose}
-          onError={this.handleNotificationOnError}
           timeout={2000}
-          title={this.state.title}
-          options={this.state.options}
+          title={`your turn, ${this.props.userName}`}
+          options={{
+            icon: "/images/poop.png"
+          }}
         />
-        <audio id="sound" preload="auto">
+        <audio
+          id="sound"
+          preload="auto"
+          ref={el => {
+            this.sound = el
+          }}
+        >
           <source src="/audio/notification.mp3" type="audio/mpeg" />
           <embed
             hidden={true}
@@ -120,7 +80,7 @@ class NotificationController extends React.Component {
           />
         </audio>
       </div>
-    )
+    ) : null
   }
 }
 
