@@ -49,6 +49,7 @@ class Game extends Component {
     trickWinner: null,
     roundScore: {},
     showScore: false,
+    showYourTurn: false,
     trump: ""
   }
 
@@ -173,6 +174,9 @@ class Game extends Component {
           this.setState(prevState => ({
             game: { ...prevState.game, [key]: value }
           }))
+          // if (key === "currentPlayer" && value === playerId) {
+          //   this.setState({ showYourTurn: true })
+          // }
         }),
         this.gameRef.on("child_changed", data => {
           let value = data.val()
@@ -188,6 +192,9 @@ class Game extends Component {
                   game: { ...prevState.game, [key]: value }
                 }
           )
+          // if (key === "currentPlayer" && value === playerId) {
+          //   this.setState({ showYourTurn: true })
+          // }
         }),
         this.gameRef.on("child_removed", data => {
           const key = data.key
@@ -622,6 +629,7 @@ class Game extends Component {
       loading,
       winner,
       showScore,
+      showYourTurn,
       trump
     } = this.state
     let name,
@@ -806,6 +814,23 @@ class Game extends Component {
               </Row>
             </Container>
           </ModalBody>
+        </Modal>
+        <Modal
+          isOpen={showYourTurn}
+          toggle={() => this.setState({ showYourTurn: false })}
+          onOpened={() => {
+            setTimeout(() => {
+              this.setState({ showYourTurn: false })
+            }, 800)
+          }}
+        >
+          <Container>
+            <Row>
+              <Col>
+                <h2>your turn...</h2>
+              </Col>
+            </Row>
+          </Container>
         </Modal>
         <Spinner loading={loading} />
       </>
