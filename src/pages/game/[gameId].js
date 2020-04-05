@@ -32,6 +32,8 @@ import {
 import Spinner from "../../components/Spinner"
 import Players from "../../components/Players"
 import { withRouter } from "next/router"
+import ModalHeader from "reactstrap/lib/ModalHeader"
+import NotificationController from "../../components/NotificationController"
 
 class Game extends Component {
   state = {
@@ -174,9 +176,9 @@ class Game extends Component {
           this.setState(prevState => ({
             game: { ...prevState.game, [key]: value }
           }))
-          // if (key === "currentPlayer" && value === playerId) {
-          //   this.setState({ showYourTurn: true })
-          // }
+          if (key === "currentPlayer" && value === playerId) {
+            this.setState({ showYourTurn: true })
+          }
         }),
         this.gameRef.on("child_changed", data => {
           let value = data.val()
@@ -192,9 +194,9 @@ class Game extends Component {
                   game: { ...prevState.game, [key]: value }
                 }
           )
-          // if (key === "currentPlayer" && value === playerId) {
-          //   this.setState({ showYourTurn: true })
-          // }
+          if (key === "currentPlayer" && value === playerId) {
+            this.setState({ showYourTurn: true })
+          }
         }),
         this.gameRef.on("child_removed", data => {
           const key = data.key
@@ -603,14 +605,15 @@ class Game extends Component {
       this.listenToHand({ playerId, roundId })
     ])
     this.setState({
-      showScore: false
+      // showScore: false,
+      winner: null
     })
-    this.setState(prevState => {
-      return {
-        winner: null,
-        showScore: false
-      }
-    })
+    // this.setState(prevState => {
+    //   return {
+    //     winner: null,
+    //     showScore: false
+    //   }
+    // })
   }
 
   render() {
@@ -658,6 +661,9 @@ class Game extends Component {
     if (trick) {
       leadSuit = trick.leadSuit
     }
+
+    const user = players.find(p => p.playerId === playerId)
+    const userName = (user && user.name) || ""
 
     return (
       <>
@@ -774,68 +780,64 @@ class Game extends Component {
             </Container>
           </ModalBody>
         </Modal>
-        <Modal isOpen={showScore || status === "over"} toggle={this.closeModal}>
+        <Modal isOpen={status === "over"}>
+          <ModalHeader>
+            <Row>
+              <Col className="d-flex justify-content-center mb-3">
+                <h1>game over</h1>
+              </Col>
+            </Row>
+          </ModalHeader>
           <ModalBody>
-            <Container>
-              <Row>
-                <Col className="d-flex justify-content-center mb-3">
-                  <h3>SCORES</h3>
-                </Col>
-              </Row>
-              {players
-                .sort((a, b) => {
-                  const aScore =
-                    gameScore && gameScore[a.playerId]
-                      ? gameScore[a.playerId]
-                      : 0
-                  const bScore =
-                    gameScore && gameScore[b.playerId]
-                      ? gameScore[b.playerId]
-                      : 0
-                  if (aScore < bScore) {
-                    return -1
-                  }
-                  if (aScore > bScore) {
-                    return 1
-                  }
-                  return 0
-                })
-                .map(player => (
-                  <Row key={player.playerId}>
-                    <Col xs="6">
-                      <h5>{player.name}</h5>
-                    </Col>
-                    <Col xs="6">
-                      <h5 style={{ textAlign: "center" }}>
-                        {gameScore && gameScore[player.playerId]
-                          ? gameScore[player.playerId]
-                          : "0"}
-                      </h5>
-                    </Col>
-                  </Row>
-                ))}
-              <Row>
-                <Col className="d-flex justify-content-center mt-3">
-                  {status === "over" ? (
-                    <Button
-                      color="success"
-                      onClick={() => {
-                        this.props.router.push("/")
-                      }}
-                    >
-                      NEW GAME
-                    </Button>
-                  ) : (
-                    <Button color="primary" onClick={this.closeModal}>
-                      CLOSE
-                    </Button>
-                  )}
-                </Col>
-              </Row>
-            </Container>
+            {players
+              .sort((a, b) => {
+                const aScore =
+                  gameScore && gameScore[a.playerId] ? gameScore[a.playerId] : 0
+                const bScore =
+                  gameScore && gameScore[b.playerId] ? gameScore[b.playerId] : 0
+                if (aScore < bScore) {
+                  return -1
+                }
+                if (aScore > bScore) {
+                  return 1
+                }
+                return 0
+              })
+              .map(player => (
+                <Row key={player.playerId}>
+                  <Col xs="6">
+                    <h5>{player.name}</h5>
+                  </Col>
+                  <Col xs="6">
+                    <h5 style={{ textAlign: "center" }}>
+                      {gameScore && gameScore[player.playerId]
+                        ? gameScore[player.playerId]
+                        : "0"}
+                    </h5>
+                  </Col>
+                </Row>
+              ))}
+            <Row>
+              <Col className="d-flex justify-content-center mt-3">
+                {status === "over" ? (
+                  <Button
+                    color="success"
+                    onClick={() => {
+                      this.props.router.push("/")
+                    }}
+                  >
+                    NEW GAME
+                  </Button>
+                ) : (
+                  <Button color="primary" onClick={this.closeModal}>
+                    CLOSE
+                  </Button>
+                )}
+              </Col>
+            </Row>
           </ModalBody>
         </Modal>
-        <Modal
+        {/* <Modal
           isOpen={showYourTurn}
           toggle={() => this.setState({ showYourTurn: false })}
           onOpened={() => {
@@ -851,8 +853,13 @@ class Game extends Component {
               </Col>
             </Row>
           </Container>
-        </Modal>
+        </Modal> */}
         <Spinner loading={loading} />
+        <NotificationController
+          showNotification={showYourTurn}
+          onClose={() => this.setState({ showYourTurn: false })}
+          userName={userName}
+        />
       </>
     )
   }
