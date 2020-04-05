@@ -753,6 +753,7 @@ class Game extends Component {
             handleChange={this.handleChange}
             submitBid={this.submitBid}
             thisPlayer={playerId}
+            gameScore={gameScore}
           />
         </Container>
         <CardRow cards={hand} playCard={this.playCard} />
