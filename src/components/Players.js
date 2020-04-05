@@ -19,7 +19,8 @@ const Players = ({
   handleChange,
   submitBid,
   dealer,
-  thisPlayer
+  thisPlayer,
+  gameScore
 }) => {
   const thisPlayerIndex = players.findIndex(p => p.playerId === thisPlayer)
   const newPlayers = [
@@ -41,15 +42,23 @@ const Players = ({
             >
               <Row>
                 <Col xs="4">
-                  <h2
-                    className={classNames({
-                      [styles.current_player]: isCurrent,
-                      [styles.not_present]: !present,
-                      [styles.dealer]: isDealer
-                    })}
+                  <div
+                    data-player-score={
+                      gameScore && gameScore[playerId]
+                        ? gameScore[playerId]
+                        : "0"
+                    }
                   >
-                    {name}
-                  </h2>
+                    <h2
+                      className={classNames({
+                        [styles.current_player]: isCurrent,
+                        [styles.not_present]: !present,
+                        [styles.dealer]: isDealer
+                      })}
+                    >
+                      {name}
+                    </h2>
+                  </div>
                 </Col>
                 {bids && bids[playerId] != null ? (
                   <>
