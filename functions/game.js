@@ -7,7 +7,7 @@ exports.startGame = async (req, res) => {
 
     const deckSize = 52
     const numPlayers = players.length
-    let numCards = 3
+    let numCards = 10
     while (numPlayers * numCards > deckSize) {
       numCards--
     }
