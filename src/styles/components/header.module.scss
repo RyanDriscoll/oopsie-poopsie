@@ -1,7 +1,10 @@
+@import "../global/variables.scss";
+
 .navigation_wrapper {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: relative;
 
   .title {
     h1 {
@@ -9,7 +12,26 @@
     }
   }
 
-  .new_game {
+  .space {
     width: 60px;
+  }
+
+  .rules {
+    margin: 0 15px;
+    position: absolute;
+    right: 0;
+    top: 0;
+    padding: 0;
+    border: none;
+
+    h4 {
+      margin: 0;
+      background-color: $black;
+      color: $red;
+      font-style: italic;
+      font-family: $font-bold;
+      padding: 0 4px 0 0;
+      cursor: pointer;
+    }
   }
 }
