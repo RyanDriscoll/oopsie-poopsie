@@ -28,17 +28,25 @@ ul.players {
       position: relative;
     }
 
-    .dealer {
-      &::after {
-        position: absolute;
-        content: "dealer";
-        bottom: 0;
-        color: $red;
-        font-family: $font-bold;
-        font-size: 10px;
-        padding-left: 22px;
-        line-height: 2.6;
-      }
+    [data-player-score]::before,
+    .dealer::after {
+      position: absolute;
+      bottom: 0;
+      color: $red;
+      font-family: $font-bold;
+      font-size: 10px;
+      line-height: 2.6;
+    }
+
+    [data-player-score]::before {
+      content: attr(data-player-score);
+      padding-right: 45px;
+      left: 0;
+    }
+
+    .dealer::after {
+      content: "dealer";
+      padding-left: 22px;
     }
 
     .current_player {
