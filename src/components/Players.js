@@ -17,16 +17,17 @@ const Players = ({
   trick,
   bid,
   handleChange,
+  handleToggle,
   submitBid,
   dealer,
   thisPlayer,
   gameScore,
-  status
+  status,
 }) => {
-  const thisPlayerIndex = players.findIndex(p => p.playerId === thisPlayer)
+  const thisPlayerIndex = players.findIndex((p) => p.playerId === thisPlayer)
   const newPlayers = [
     ...players.slice(thisPlayerIndex),
-    ...players.slice(0, thisPlayerIndex)
+    ...players.slice(0, thisPlayerIndex),
   ]
   return (
     <ul className={styles.players}>
@@ -43,7 +44,7 @@ const Players = ({
             <li
               key={playerId}
               className={classNames({
-                [styles.current_player_arrow]: isCurrent
+                [styles.current_player_arrow]: isCurrent,
               })}
             >
               <Row>
@@ -53,7 +54,7 @@ const Players = ({
                       className={classNames({
                         [styles.current_player]: isCurrent,
                         [styles.not_present]: !present,
-                        [styles.dealer]: isDealer
+                        [styles.dealer]: isDealer,
                       })}
                     >
                       {name}
@@ -74,7 +75,7 @@ const Players = ({
                           <img src={getSource(trick.cards[playerId].suit)} />
                           <h2
                             style={{
-                              color: getColor(trick.cards[playerId].suit)
+                              color: getColor(trick.cards[playerId].suit),
                             }}
                           >
                             {trick.cards[playerId].value}
@@ -88,16 +89,39 @@ const Players = ({
                     {thisPlayer === playerId && currentPlayer === playerId && (
                       <Form>
                         <InputGroup>
+                          <InputGroupAddon addonType="prepend">
+                            <Button
+                              color="danger"
+                              onClick={(e) =>
+                                handleToggle(false, e.target.value)
+                              }
+                            >
+                              -
+                            </Button>
+                          </InputGroupAddon>
                           <Input
                             data-lpignore="true"
                             type="text"
                             value={bid}
                             name="bid"
                             id="bid"
+                            className={styles.bid}
                             onChange={handleChange}
                           />
                           <InputGroupAddon addonType="append">
-                            <Button onClick={submitBid}>BID</Button>
+                            <Button
+                              color="success"
+                              onClick={(e) =>
+                                handleToggle(true, e.target.value)
+                              }
+                            >
+                              +
+                            </Button>
+                          </InputGroupAddon>
+                          <InputGroupAddon addonType="append">
+                            <Button color="primary" onClick={submitBid}>
+                              BID
+                            </Button>
                           </InputGroupAddon>
                         </InputGroup>
                       </Form>

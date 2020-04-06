@@ -36,31 +36,34 @@ import ModalHeader from "reactstrap/lib/ModalHeader"
 import NotificationController from "../../components/NotificationController"
 
 class Game extends Component {
-  state = {
-    loading: false,
-    game: null,
-    players: [],
-    playerId: null,
-    playerName: "",
-    hand: [],
-    isHost: false,
-    bid: "",
-    bids: {},
-    tricks: [],
-    trickIndex: 0,
-    trickWinner: null,
-    roundScore: {},
-    showScore: false,
-    showYourTurn: false,
-    trump: ""
-  }
+  constructor(props) {
+    super(props)
+    this.state = {
+      loading: false,
+      game: null,
+      players: [],
+      playerId: null,
+      playerName: "",
+      hand: [],
+      isHost: false,
+      bid: "0",
+      bids: {},
+      tricks: [],
+      trickIndex: 0,
+      trickWinner: null,
+      roundScore: {},
+      showScore: false,
+      showYourTurn: false,
+      trump: ""
+    }
 
-  gameRef
-  playersRef
-  handRef
-  bidRef
-  trickRef
-  trumpRef
+    this.gameRef
+    this.playersRef
+    this.handRef
+    this.bidRef
+    this.trickRef
+    this.trumpRef
+  }
 
   async componentDidMount() {
     try {
@@ -125,9 +128,7 @@ class Game extends Component {
 
   listenToPlayers = async (gameId, playerId) => {
     try {
-      this.playersRef = ref(`players`)
-        .orderByChild("gameId")
-        .equalTo(gameId)
+      this.playersRef = ref(`players`).orderByChild("gameId").equalTo(gameId)
 
       await Promise.all([
         this.playersRef.on("child_added", data => {
@@ -243,9 +244,9 @@ class Game extends Component {
       }
       this.trumpRef.on("value", data => {
         const trump = data.val()
-        this.setState(prevState => ({
+        this.setState({
           trump
-        }))
+        })
       })
     } catch (error) {
       console.error(`$$>>>>: error`, error)
@@ -342,22 +343,13 @@ class Game extends Component {
     }
   }
 
-  listenToRound = roundId => {
+  listenToRound = async roundId => {
     try {
-      this.setState(
-        {
-          trump: "",
-          bids: {},
-          tricks: []
-        },
-        async () => {
-          await Promise.all([
-            this.listenToTrump(roundId),
-            this.listenToTrick(roundId),
-            this.listenToBid(roundId)
-          ])
-        }
-      )
+      await Promise.all([
+        this.listenToTrump(roundId),
+        this.listenToTrick(roundId),
+        this.listenToBid(roundId)
+      ])
     } catch (error) {
       console.error(`$$>>>>: Game -> listenToRound -> error`, error)
     }
@@ -577,7 +569,7 @@ class Game extends Component {
       if (wouldMakeClean < 0) {
         return true
       }
-      return wouldMakeClean.toString() !== value
+      return wouldMakeClean !== +value
     }
     return true
   }
@@ -595,6 +587,20 @@ class Game extends Component {
     }
   }
 
+  handleToggle = inc => {
+    this.setState(prevState => {
+      let newBid = Number(prevState.bid)
+      newBid = inc ? newBid + 1 : newBid - 1
+      while (!this.handleDirtyGame(newBid)) {
+        newBid = inc ? newBid + 1 : newBid - 1
+      }
+      if (newBid >= 0 && newBid <= prevState.hand.length) {
+        return { bid: newBid }
+      }
+      return {}
+    })
+  }
+
   closeModal = async () => {
     const {
       playerId,
@@ -605,15 +611,8 @@ class Game extends Component {
       this.listenToHand({ playerId, roundId })
     ])
     this.setState({
-      // showScore: false,
       winner: null
     })
-    // this.setState(prevState => {
-    //   return {
-    //     winner: null,
-    //     showScore: false
-    //   }
-    // })
   }
 
   render() {
@@ -757,6 +756,7 @@ class Game extends Component {
             bid={bid}
             dealer={dealer}
             handleChange={this.handleChange}
+            handleToggle={this.handleToggle}
             submitBid={this.submitBid}
             thisPlayer={playerId}
             gameScore={gameScore}
