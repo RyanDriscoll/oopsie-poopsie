@@ -1,0 +1,42 @@
+[
+  {
+    "gameId": "0",
+    "host": true,
+    "name": "driz",
+    "playerId": "0",
+    "present": true
+  },
+  {
+    "gameId": "0",
+    "name": "grazzle",
+    "playerId": "1",
+    "present": true
+  },
+  {
+    "gameId": "0",
+    "name": "culltron",
+    "playerId": "2",
+    "present": true
+  },
+  {
+    "gameId": "0",
+    "host": true,
+    "name": "murph",
+    "playerId": "3",
+    "present": true
+  },
+  {
+    "gameId": "0",
+    "host": true,
+    "name": "bman",
+    "playerId": "4",
+    "present": true
+  },
+  {
+    "gameId": "0",
+    "host": true,
+    "name": "julia",
+    "playerId": "5",
+    "present": true
+  }
+]

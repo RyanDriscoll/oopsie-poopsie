@@ -1,0 +1,24 @@
+[
+  {
+    "cards": {
+      "0": {
+        "cardId": "-M4FYSrQwUW7NKkagPEc",
+        "playerId": "0",
+        "rank": 10,
+        "suit": "S",
+        "value": "J"
+      },
+      "1": {
+        "cardId": "-M4FYSrQwUW7NKkagPEc",
+        "playerId": "1",
+        "rank": 8,
+        "suit": "S",
+        "value": "7"
+      }
+    },
+    "leadSuit": "S",
+    "leader": "0",
+    "trickId": "-M4FYSrPUBqHTBIEXwXq",
+    "winner": "-M4FYSC-gPg1SQOBQReE"
+  }
+]

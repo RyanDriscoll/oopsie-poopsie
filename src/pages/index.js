@@ -9,7 +9,7 @@ import Input from "reactstrap/lib/Input"
 import InputGroup from "reactstrap/lib/InputGroup"
 import InputGroupAddon from "reactstrap/lib/InputGroupAddon"
 import Row from "reactstrap/lib/Row"
-import { ref } from "../lib/firebase"
+// import { ref } from "../lib/firebase"
 import { withRouter } from "next/router"
 import { absoluteUrl } from "../utils/helpers"
 import styles from "../styles/pages/home.module.scss"
@@ -37,25 +37,25 @@ const CreateGame = ({ origin }) => {
 
   const newGame = async () => {
     try {
-      const newGameRef = ref("games").push()
-      const gameId = newGameRef.key
-      const playerRef = ref(`players`).push()
-      const playerId = playerRef.key
-      const updateObj = {}
-      updateObj[`games/${gameId}/name`] = game
-      updateObj[`games/${gameId}/gameId`] = gameId
-      updateObj[`games/${gameId}/status`] = "pending"
-      updateObj[`games/${gameId}/dirty`] = dirty
-      updateObj[`players/${playerId}/name`] = name
-      updateObj[`players/${playerId}/gameId`] = gameId
-      updateObj[`players/${playerId}/host`] = true
-      updateObj[`players/${playerId}/playerId`] = playerId
-      await ref().update(updateObj)
-      localStorage.setItem(`oh-shit-game-${gameId}-player-id`, playerId)
-      setGameId(gameId)
-      setUrl(`${origin}/game/${gameId}`)
-      setName("")
-      setGame("")
+      // const newGameRef = ref("games").push()
+      // const gameId = newGameRef.key
+      // const playerRef = ref(`players`).push()
+      // const playerId = playerRef.key
+      // const updateObj = {}
+      // updateObj[`games/${gameId}/name`] = game
+      // updateObj[`games/${gameId}/gameId`] = gameId
+      // updateObj[`games/${gameId}/status`] = "pending"
+      // updateObj[`games/${gameId}/dirty`] = dirty
+      // updateObj[`players/${playerId}/name`] = name
+      // updateObj[`players/${playerId}/gameId`] = gameId
+      // updateObj[`players/${playerId}/host`] = true
+      // updateObj[`players/${playerId}/playerId`] = playerId
+      // await ref().update(updateObj)
+      // localStorage.setItem(`oh-shit-game-${gameId}-player-id`, playerId)
+      // setGameId(gameId)
+      // setUrl(`${origin}/game/${gameId}`)
+      // setName("")
+      // setGame("")
     } catch (error) {
       console.error(`$$>>>>: newGame -> error`, error)
     }
