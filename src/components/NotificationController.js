@@ -1,5 +1,6 @@
 import React, { createRef } from "react"
 import dynamic from "next/dynamic"
+import CombinedContext from "../context/CombinedContext"
 // import Notification from "react-web-notification"
 const Notification = dynamic(() => import("react-web-notification"), {
   ssr: false
@@ -14,6 +15,7 @@ class NotificationController extends React.Component {
 
     this.sound = createRef()
   }
+  static contextType = CombinedContext
 
   handlePermissionGranted = () => {
     console.log("Permission Granted")
@@ -39,7 +41,9 @@ class NotificationController extends React.Component {
   }
 
   handleNotificationOnShow = (e, tag) => {
-    this.playSound()
+    if (!this.context.mute) {
+      this.playSound()
+    }
   }
 
   playSound = filename => {
@@ -59,8 +63,9 @@ class NotificationController extends React.Component {
           onShow={this.handleNotificationOnShow}
           onClose={this.handleNotificationOnClose}
           timeout={2000}
-          title={`your turn, ${this.props.userName}`}
+          title={"oopsie poopsie..."}
           options={{
+            body: `your turn, ${this.props.userName}`,
             icon: "/images/poop.png"
           }}
         />

@@ -1,16 +1,26 @@
-import React, { useState } from "react"
+import React, { useState, useContext } from "react"
 import Link from "next/link"
 import styles from "../styles/components/header.module.scss"
 import Button from "reactstrap/lib/Button"
 import Modal from "reactstrap/lib/Modal"
 import ModalHeader from "reactstrap/lib/ModalHeader"
 import ModalBody from "reactstrap/lib/ModalBody"
+import CombinedContext from "../context/CombinedContext"
+import { Sound, Mute } from "../components/Icons"
 
 const Header = () => {
   const [showRules, setShowRules] = useState(false)
   const toggleRules = () => {
     setShowRules(!showRules)
   }
+  const { mute, setState } = useContext(CombinedContext)
+
+  const handleClick = () => {
+    setState(prevState => ({
+      mute: !prevState.mute
+    }))
+  }
+
   return (
     <>
       <header>
@@ -27,9 +37,22 @@ const Header = () => {
           </div>
 
           <div className={styles.space}></div>
-          <Button onClick={toggleRules} className={styles.rules}>
-            <h4>rules</h4>
-          </Button>
+          <div className={styles.rules}>
+            <div
+              title={`Notification sounds ${mute ? "muted" : "active"}`}
+              onClick={handleClick}
+              style={{ cursor: "pointer", marginRight: 15 }}
+            >
+              {mute ? (
+                <Mute style={{ width: 25 }} />
+              ) : (
+                <Sound style={{ width: 25 }} />
+              )}
+            </div>
+            <Button onClick={toggleRules}>
+              <h4>rules</h4>
+            </Button>
+          </div>
         </div>
       </header>
       <Modal size="lg" isOpen={showRules} toggle={toggleRules}>
