@@ -1,27 +1,23 @@
-import React from "react";
-import App from "next/app";
-import fetch from "isomorphic-unfetch";
-import getCookies from "next-cookies";
-import Head from "next/head";
-import Router from "next/router";
-import "bootstrap/dist/css/bootstrap.min.css";
-import "../styles/main.scss";
-import { auth, ref } from "../lib/firebase";
-import { CombinedProvider } from "../context/CombinedContext";
+import React from "react"
+import App from "next/app"
+import Head from "next/head"
+import "bootstrap/dist/css/bootstrap.min.css"
+import "../styles/main.scss"
+import { CombinedProvider } from "../context/CombinedContext"
 
-import Layout from "../components/Layout";
+import Layout from "../components/Layout"
 
 export default class MyApp extends App {
-  initialState = {
-    setState: this.setState.bind(this),
-    loading: false,
-    players: []
-  };
-
-  state = this.initialState;
+  constructor(props) {
+    super(props)
+    this.state = {
+      setState: this.setState.bind(this),
+      mute: false
+    }
+  }
 
   render() {
-    const { Component, pageProps, user } = this.props;
+    const { Component, pageProps } = this.props
 
     return (
       <CombinedProvider value={this.state}>
@@ -33,6 +29,6 @@ export default class MyApp extends App {
           <Component {...pageProps} />
         </Layout>
       </CombinedProvider>
-    );
+    )
   }
 }

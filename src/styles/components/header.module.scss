@@ -17,12 +17,15 @@
   }
 
   .rules {
-    margin: 0 15px;
     position: absolute;
     right: 0;
     top: 0;
-    padding: 0;
-    border: none;
+    display: flex;
+
+    button {
+      padding: 0;
+      border: none;
+    }
 
     h4 {
       margin: 0;
