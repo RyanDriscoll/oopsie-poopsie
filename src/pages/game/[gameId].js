@@ -121,7 +121,8 @@ class Game extends Component {
       event.preventDefault()
       // Chrome requires returnValue to be set.
       event.returnValue = ""
-
+    })
+    window.addEventListener("unload", event => {
       ref(`players/${playerId}`).update({ present: false, gameId })
     })
   }
@@ -382,7 +383,10 @@ class Game extends Component {
     try {
       this.setState({ loading: true })
       const { gameId } = this.props
-      let { players } = this.state
+      let {
+        players,
+        game: { numCards }
+      } = this.state
       const response = await fetch(
         "https://us-central1-oh-shit-ac7c3.cloudfunctions.net/api/start-game",
         {
@@ -390,7 +394,7 @@ class Game extends Component {
           headers: {
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({ gameId, players })
+          body: JSON.stringify({ gameId, players, numCards })
         }
       )
       this.setState({ loading: false })

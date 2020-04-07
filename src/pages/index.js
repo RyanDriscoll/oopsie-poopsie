@@ -23,15 +23,28 @@ const CreateGame = ({ origin }) => {
   const [url, setUrl] = useState("")
   const [copySuccess, setCopySuccess] = useState("")
   const [dirty, setDirty] = useState(false)
+  const [numCards, setNumCards] = useState(10)
 
   const gameUrlRef = useRef(null)
 
   const handleChange = e => {
     const { name, value } = e.target
-    if (name === "name") {
-      setName(value)
-    } else {
-      setGame(value)
+    switch (name) {
+      case "name":
+        setName(value)
+        break
+      case "game":
+        setGame(value)
+        break
+      default:
+        break
+    }
+  }
+
+  const handleToggle = inc => {
+    const newNumCards = inc ? numCards + 1 : numCards - 1
+    if (newNumCards <= 10 && newNumCards >= 1) {
+      setNumCards(newNumCards)
     }
   }
 
@@ -46,6 +59,7 @@ const CreateGame = ({ origin }) => {
       updateObj[`games/${gameId}/gameId`] = gameId
       updateObj[`games/${gameId}/status`] = "pending"
       updateObj[`games/${gameId}/dirty`] = dirty
+      updateObj[`games/${gameId}/numCards`] = numCards
       updateObj[`players/${playerId}/name`] = name
       updateObj[`players/${playerId}/gameId`] = gameId
       updateObj[`players/${playerId}/host`] = true
@@ -108,12 +122,11 @@ const CreateGame = ({ origin }) => {
                   name="game"
                   id="game"
                   value={game}
-                  onChange={handleChange}
                   placeholder="optional"
                 />
               </FormGroup>
               <FormGroup>
-                <Label for="game">User Name</Label>
+                <Label for="name">User Name</Label>
                 <Input
                   type="text"
                   name="name"
@@ -122,6 +135,39 @@ const CreateGame = ({ origin }) => {
                   onChange={handleChange}
                 />
               </FormGroup>
+              <Col xs="6" className="p-0">
+                <FormGroup>
+                  <Label for="num-cards">Number of cards</Label>
+                  <InputGroup>
+                    <InputGroupAddon addonType="prepend">
+                      <Button
+                        color="danger"
+                        onClick={e => handleToggle(false, e.target.value)}
+                      >
+                        -
+                      </Button>
+                    </InputGroupAddon>
+                    <Input
+                      data-lpignore="true"
+                      type="text"
+                      value={numCards}
+                      name="num-cards"
+                      id="num-cards"
+                      className="text-center"
+                      readOnly
+                    />
+                    <InputGroupAddon addonType="append">
+                      <Button
+                        color="success"
+                        onClick={e => handleToggle(true, e.target.value)}
+                      >
+                        +
+                      </Button>
+                    </InputGroupAddon>
+                  </InputGroup>
+                </FormGroup>
+              </Col>
+
               <FormGroup check>
                 <Label check>
                   <Input
