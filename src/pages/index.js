@@ -158,7 +158,7 @@ const CreateGame = ({ origin }) => {
                       value={numCards}
                       name="num-cards"
                       id="num-cards"
-                      className="text-center"
+                      className={styles.num_cards}
                       readOnly
                     />
                     <InputGroupAddon addonType="append">
@@ -193,7 +193,7 @@ const CreateGame = ({ origin }) => {
                     checked={noBidPoints}
                     onChange={e => setNoBidPoints(!noBidPoints)}
                   />{" "}
-                  No points for bogus bidders
+                  No points for bogus bids
                 </Label>
               </FormGroup>
 
