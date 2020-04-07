@@ -9,9 +9,9 @@ import Input from "reactstrap/lib/Input"
 import InputGroup from "reactstrap/lib/InputGroup"
 import InputGroupAddon from "reactstrap/lib/InputGroupAddon"
 import Row from "reactstrap/lib/Row"
-import { ref } from "../lib/firebase"
 import { withRouter } from "next/router"
 import { absoluteUrl } from "../utils/helpers"
+import { newGame } from "../utils/api"
 import styles from "../styles/pages/home.module.scss"
 import { CopyIcon } from "../components/Icons"
 import Col from "reactstrap/lib/Col"
@@ -23,6 +23,7 @@ const CreateGame = ({ origin }) => {
   const [url, setUrl] = useState("")
   const [copySuccess, setCopySuccess] = useState("")
   const [dirty, setDirty] = useState(false)
+  const [noBidPoints, setNoBidPoints] = useState(false)
   const [numCards, setNumCards] = useState(10)
 
   const gameUrlRef = useRef(null)
@@ -48,30 +49,26 @@ const CreateGame = ({ origin }) => {
     }
   }
 
-  const newGame = async () => {
+  const initializeGame = async () => {
     try {
-      const newGameRef = ref("games").push()
-      const gameId = newGameRef.key
-      const playerRef = ref(`players`).push()
-      const playerId = playerRef.key
-      const updateObj = {}
-      updateObj[`games/${gameId}/name`] = game
-      updateObj[`games/${gameId}/gameId`] = gameId
-      updateObj[`games/${gameId}/status`] = "pending"
-      updateObj[`games/${gameId}/dirty`] = dirty
-      updateObj[`games/${gameId}/numCards`] = numCards
-      updateObj[`players/${playerId}/name`] = name
-      updateObj[`players/${playerId}/gameId`] = gameId
-      updateObj[`players/${playerId}/host`] = true
-      updateObj[`players/${playerId}/playerId`] = playerId
-      await ref().update(updateObj)
-      localStorage.setItem(`oh-shit-game-${gameId}-player-id`, playerId)
-      setGameId(gameId)
-      setUrl(`${origin}/game/${gameId}`)
-      setName("")
-      setGame("")
+      const body = {
+        game,
+        name,
+        numCards,
+        noBidPoints,
+        dirty
+      }
+      const response = await newGame(body)
+      if (response.ok) {
+        const { playerId, gameId } = await response.json()
+        localStorage.setItem(`oh-shit-game-${gameId}-player-id`, playerId)
+        setGameId(gameId)
+        setUrl(`${origin}/game/${gameId}`)
+        setName("")
+        setGame("")
+      }
     } catch (error) {
-      console.error(`$$>>>>: newGame -> error`, error)
+      console.error(`$$>>>>: initializeGame -> error`, error)
     }
   }
 
@@ -95,7 +92,12 @@ const CreateGame = ({ origin }) => {
           >
             <Col xs="7">
               <InputGroup>
-                <Input value={url} readOnly innerRef={gameUrlRef} />
+                <Input
+                  value={url}
+                  readOnly
+                  innerRef={gameUrlRef}
+                  data-lpignore="true"
+                />
                 <InputGroupAddon addonType="append">
                   <Button onClick={copyToClipboard}>
                     <CopyIcon style={{ width: 18 }} />
@@ -118,16 +120,19 @@ const CreateGame = ({ origin }) => {
               <FormGroup>
                 <Label for="game">Game Name</Label>
                 <Input
+                  data-lpignore="true"
                   type="text"
                   name="game"
                   id="game"
                   value={game}
+                  onChange={handleChange}
                   placeholder="optional"
                 />
               </FormGroup>
               <FormGroup>
                 <Label for="name">User Name</Label>
                 <Input
+                  data-lpignore="true"
                   type="text"
                   name="name"
                   id="name"
@@ -179,8 +184,25 @@ const CreateGame = ({ origin }) => {
                   No clean bids
                 </Label>
               </FormGroup>
+
+              <FormGroup check>
+                <Label check>
+                  <Input
+                    type="checkbox"
+                    id="bid-point-checkbox"
+                    checked={noBidPoints}
+                    onChange={e => setNoBidPoints(!noBidPoints)}
+                  />{" "}
+                  No points for bogus bidders
+                </Label>
+              </FormGroup>
+
               <div className="d-flex justify-content-center mt-3">
-                <Button disabled={!name} color="primary" onClick={newGame}>
+                <Button
+                  disabled={!name}
+                  color="primary"
+                  onClick={initializeGame}
+                >
                   NEW GAME
                 </Button>
               </div>
