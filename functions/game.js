@@ -1,5 +1,32 @@
 const Deck = require("./deck")
 
+exports.newGame = async (req, res) => {
+  try {
+    const { ref, body } = req
+    const { game, name, numCards, noBidPoints, dirty } = body
+    const newGameRef = ref("games").push()
+    const gameId = newGameRef.key
+    const playerRef = ref(`players`).push()
+    const playerId = playerRef.key
+    const updateObj = {}
+    updateObj[`games/${gameId}/name`] = game
+    updateObj[`games/${gameId}/gameId`] = gameId
+    updateObj[`games/${gameId}/status`] = "pending"
+    updateObj[`games/${gameId}/dirty`] = dirty
+    updateObj[`games/${gameId}/noBidPoints`] = noBidPoints
+    updateObj[`games/${gameId}/numCards`] = numCards
+    updateObj[`players/${playerId}/name`] = name
+    updateObj[`players/${playerId}/gameId`] = gameId
+    updateObj[`players/${playerId}/host`] = true
+    updateObj[`players/${playerId}/playerId`] = playerId
+    await ref().update(updateObj)
+    return res.status(200).send({ playerId, gameId })
+  } catch (error) {
+    console.log(`$$>>>>: exports.newGame -> error`, error)
+    return res.sendStatus(500)
+  }
+}
+
 exports.startGame = async (req, res) => {
   try {
     const { ref, body } = req
@@ -74,7 +101,7 @@ exports.startGame = async (req, res) => {
     })
 
     await ref().update(updateObj)
-    return res.status(200).send("success")
+    return res.sendStatus(200)
   } catch (error) {
     console.error(`$$>>>>: startGame -> error`, error)
     return res.sendStatus(500)
@@ -93,7 +120,7 @@ exports.submitBid = async (req, res) => {
       updateObj[`games/${gameId}/status`] = "play"
     }
     await ref().update(updateObj)
-    return res.status(200).send("success")
+    return res.sendStatus(200)
   } catch (error) {
     console.error(`$$>>>>: submitBid -> error`, error)
     return res.sendStatus(500)
@@ -134,7 +161,7 @@ exports.playCard = async (req, res) => {
       }
     }
     await ref().update(updateObj)
-    return res.status(200).send("success")
+    return res.sendStatus(200)
   } catch (error) {
     console.error(`$$>>>>: playCard -> error`, error)
     return res.sendStatus(500)
@@ -228,9 +255,43 @@ exports.nextRound = async (req, res) => {
     }
 
     await ref().update(updateObj)
-    return res.status(200).send("success")
+    return res.sendStatus(200)
   } catch (error) {
     console.log(`$$>>>>: exports.nextRound -> error`, error)
+    return res.sendStatus(500)
+  }
+}
+
+exports.addPlayer = async (req, res) => {
+  try {
+    const { ref, body } = req
+    const { playerName, gameId } = body
+    const playerRef = ref("players").push()
+    const playerId = playerRef.key
+    await playerRef.update({
+      name: playerName,
+      gameId,
+      playerId,
+      present: true
+    })
+    return res.status(200).send({ playerId })
+  } catch (error) {
+    console.log(`$$>>>>: exports.addPlayer -> error`, error)
+    return res.sendStatus(500)
+  }
+}
+
+exports.updatePlayer = async (req, res) => {
+  try {
+    const { ref, params } = req
+    const { playerId, gameId, present } = params
+    await ref(`players/${playerId}`).update({
+      gameId,
+      present: present === "true"
+    })
+    return res.sendStatus(200)
+  } catch (error) {
+    console.log(`$$>>>>: exports.updatePlayer -> error`, error)
     return res.sendStatus(500)
   }
 }

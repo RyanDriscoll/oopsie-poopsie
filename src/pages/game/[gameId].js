@@ -34,6 +34,14 @@ import Players from "../../components/Players"
 import { withRouter } from "next/router"
 import ModalHeader from "reactstrap/lib/ModalHeader"
 import NotificationController from "../../components/NotificationController"
+import {
+  startGame,
+  playCard,
+  submitBid,
+  updatePlayer,
+  addPlayer,
+  nextRound
+} from "../../utils/api"
 
 class Game extends Component {
   constructor(props) {
@@ -74,7 +82,7 @@ class Game extends Component {
       this.listenToPlayers(gameId, playerId)
       if (playerId) {
         this.listenToGame({ gameId, playerId })
-        await ref(`players/${playerId}`).update({ present: true, gameId })
+        await updatePlayer({ playerId, gameId, present: true })
       }
     } catch (error) {
       console.error(`$$>>>>: Game -> componentDidMount -> error`, error)
@@ -103,7 +111,7 @@ class Game extends Component {
     }
     const { playerId } = this.state
     if (playerId) {
-      await ref(`players/${playerId}`).update({ present: false, gameId })
+      await updatePlayer({ playerId, gameId, present: true })
     }
   }
 
@@ -122,8 +130,8 @@ class Game extends Component {
       // Chrome requires returnValue to be set.
       event.returnValue = ""
     })
-    window.addEventListener("unload", event => {
-      ref(`players/${playerId}`).update({ present: false, gameId })
+    window.addEventListener("unload", async event => {
+      await updatePlayer({ playerId, gameId, present: false })
     })
   }
 
@@ -361,18 +369,14 @@ class Game extends Component {
       this.setState({ loading: true })
       const { gameId } = this.props
       const { playerName } = this.state
-      const playerRef = ref("players").push()
-      const playerId = playerRef.key
-      await playerRef.update({
-        name: playerName,
-        gameId,
-        playerId,
-        present: true
-      })
-      localStorage.setItem(`oh-shit-game-${gameId}-player-id`, playerId)
-      this.setState({ playerId })
-      this.listenToGame({ gameId, playerId })
-      this.setState({ loading: false })
+      const response = await addPlayer({ playerName, gameId })
+      if (response.ok) {
+        const { playerId } = await response.json()
+        localStorage.setItem(`oh-shit-game-${gameId}-player-id`, playerId)
+        this.setState({ playerId })
+        this.listenToGame({ gameId, playerId })
+        this.setState({ loading: false })
+      }
     } catch (error) {
       this.setState({ loading: false })
       console.error(`$$>>>>: Game -> addPlayer -> error`, error)
@@ -387,16 +391,7 @@ class Game extends Component {
         players,
         game: { numCards }
       } = this.state
-      const response = await fetch(
-        "https://us-central1-oh-shit-ac7c3.cloudfunctions.net/api/start-game",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ gameId, players, numCards })
-        }
-      )
+      await startGame({ gameId, players, numCards })
       this.setState({ loading: false })
     } catch (error) {
       this.setState({ loading: false })
@@ -444,27 +439,20 @@ class Game extends Component {
           leader = leader.playerId
         }
         const nextPlayerId = getNextPlayer({ playerId, players })
-        await fetch(
-          `https://us-central1-oh-shit-ac7c3.cloudfunctions.net/api/play-card`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              playerId,
-              nextPlayerId,
-              card,
-              leader,
-              allCardsIn,
-              gameId: game.gameId,
-              roundId: game.roundId,
-              trickId: trick.trickId,
-              leadSuit,
-              nextRound
-            })
-          }
-        )
+        const body = {
+          playerId,
+          nextPlayerId,
+          card,
+          leader,
+          allCardsIn,
+          gameId: game.gameId,
+          roundId: game.roundId,
+          trickId: trick.trickId,
+          leadSuit,
+          nextRound
+        }
+        await playCard(body)
+
         if (nextRound) {
           this.nextRound()
         }
@@ -488,7 +476,8 @@ class Game extends Component {
         numRounds,
         dealer,
         score,
-        roundId
+        roundId,
+        noBidPoints
       } = game
       let descending = desc
       const roundNum = rn + 1
@@ -501,31 +490,23 @@ class Game extends Component {
         players,
         bids,
         roundScore,
-        score
+        score,
+        noBidPoints
       })
 
       const gameOver = roundNum > numRounds
-
-      await fetch(
-        `https://us-central1-oh-shit-ac7c3.cloudfunctions.net/api/next-round`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            roundNum,
-            numRounds,
-            numCards,
-            descending,
-            players,
-            gameId,
-            gameScore,
-            gameOver,
-            dealer
-          })
-        }
-      )
+      const body = {
+        roundNum,
+        numRounds,
+        numCards,
+        descending,
+        players,
+        gameId,
+        gameScore,
+        gameOver,
+        dealer
+      }
+      await nextRound(body)
     } catch (error) {
       console.error(`$$>>>>: nextRound -> error`, error)
     }
@@ -539,23 +520,16 @@ class Game extends Component {
       const { numPlayers, roundId } = game
       const allBidsIn = (Object.keys(bids || {}).length = numPlayers)
       const nextPlayerId = getNextPlayer({ playerId, players })
-      const response = await fetch(
-        `https://us-central1-oh-shit-ac7c3.cloudfunctions.net/api/submit-bid`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            gameId,
-            playerId,
-            nextPlayerId,
-            bid,
-            allBidsIn,
-            roundId
-          })
-        }
-      )
+      const body = {
+        gameId,
+        playerId,
+        nextPlayerId,
+        bid,
+        allBidsIn,
+        roundId
+      }
+
+      await submitBid(body)
       this.setState({ bid: "", loading: false })
     } catch (error) {
       this.setState({ loading: false })
@@ -737,6 +711,7 @@ class Game extends Component {
                   <FormGroup>
                     <Label for="name">User Name</Label>
                     <Input
+                      data-lpignore="true"
                       type="text"
                       name="playerName"
                       id="name"
@@ -841,23 +816,6 @@ class Game extends Component {
             </Row>
           </ModalBody>
         </Modal>
-        {/* <Modal
-          isOpen={showYourTurn}
-          toggle={() => this.setState({ showYourTurn: false })}
-          onOpened={() => {
-            setTimeout(() => {
-              this.setState({ showYourTurn: false })
-            }, 800)
-          }}
-        >
-          <Container>
-            <Row>
-              <Col>
-                <h2>your turn...</h2>
-              </Col>
-            </Row>
-          </Container>
-        </Modal> */}
         <Spinner loading={loading} />
         <NotificationController
           showNotification={showYourTurn}

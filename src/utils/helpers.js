@@ -80,11 +80,22 @@ export const getNextPlayer = ({ playerId, players }) => {
 export const getWinner = ({ winner, players }) =>
   players.find(p => p.playerId === winner).name
 
-export const calculateGameScore = ({ players, bids, roundScore, score }) => {
+export const calculateGameScore = ({
+  players,
+  bids,
+  roundScore,
+  score,
+  noBidPoints
+}) => {
   const newGameScore = { ...score }
   players.forEach(player => {
-    let newScore = roundScore[player.playerId] || 0
-    if (bids[player.playerId] === newScore) {
+    const bidsMade = bids[player.playerId]
+    let tricksWon = roundScore[player.playerId] || 0
+    let newScore = tricksWon && !noBidPoints ? tricksWon : 0
+    if (bidsMade === tricksWon) {
+      if (noBidPoints) {
+        newScore = tricksWon
+      }
       newScore += 10
     }
     if (newGameScore[player.playerId]) {
