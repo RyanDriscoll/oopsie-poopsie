@@ -12,7 +12,7 @@ export default class MyApp extends App {
     super(props)
     this.state = {
       setState: this.setState.bind(this),
-      mute: false
+      mute: true
     }
   }
 
