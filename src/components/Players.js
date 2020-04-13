@@ -1,4 +1,4 @@
-import React, { useEffect } from "react"
+import React from "react"
 import Row from "reactstrap/lib/Row"
 import Col from "reactstrap/lib/Col"
 import { getSource, getColor } from "../utils/helpers"

@@ -55,7 +55,7 @@ class Game extends Component {
       playerName: "",
       hand: [],
       isHost: false,
-      bid: "0",
+      bid: 0,
       bids: {},
       tricks: [],
       trickIndex: 0,
