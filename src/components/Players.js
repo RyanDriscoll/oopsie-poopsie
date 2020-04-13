@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useEffect } from "react"
 import Row from "reactstrap/lib/Row"
 import Col from "reactstrap/lib/Col"
 import { getSource, getColor } from "../utils/helpers"
@@ -16,19 +16,30 @@ const Players = ({
   roundScore,
   trick,
   bid,
-  handleChange,
   handleToggle,
   submitBid,
   dealer,
   thisPlayer,
   gameScore,
-  status,
+  status
 }) => {
-  const thisPlayerIndex = players.findIndex((p) => p.playerId === thisPlayer)
-  const newPlayers = [
-    ...players.slice(thisPlayerIndex),
-    ...players.slice(0, thisPlayerIndex),
-  ]
+  let newPlayers = []
+  let nextPlayer = thisPlayer
+  const haveNextPlayer =
+    Object.values(players).length > 0 &&
+    Object.values(players).every(p => p.nextPlayer)
+  if (haveNextPlayer) {
+    for (let i = 0; i < Object.keys(players).length; i++) {
+      const player = players[nextPlayer]
+      if (player) {
+        newPlayers.push(player)
+        nextPlayer = player.nextPlayer
+      }
+    }
+  } else {
+    newPlayers = Object.values(players)
+  }
+
   return (
     <ul className={styles.players}>
       {newPlayers &&
@@ -44,7 +55,7 @@ const Players = ({
             <li
               key={playerId}
               className={classNames({
-                [styles.current_player_arrow]: isCurrent,
+                [styles.current_player_arrow]: isCurrent
               })}
             >
               <Row>
@@ -54,7 +65,7 @@ const Players = ({
                       className={classNames({
                         [styles.current_player]: isCurrent,
                         [styles.not_present]: !present,
-                        [styles.dealer]: isDealer,
+                        [styles.dealer]: isDealer
                       })}
                     >
                       {name}
@@ -75,7 +86,7 @@ const Players = ({
                           <img src={getSource(trick.cards[playerId].suit)} />
                           <h2
                             style={{
-                              color: getColor(trick.cards[playerId].suit),
+                              color: getColor(trick.cards[playerId].suit)
                             }}
                           >
                             {trick.cards[playerId].value}
@@ -92,9 +103,7 @@ const Players = ({
                           <InputGroupAddon addonType="prepend">
                             <Button
                               color="danger"
-                              onClick={(e) =>
-                                handleToggle(false, e.target.value)
-                              }
+                              onClick={e => handleToggle(false, e.target.value)}
                             >
                               -
                             </Button>
@@ -106,23 +115,23 @@ const Players = ({
                             name="bid"
                             id="bid"
                             className={styles.bid}
-                            onChange={handleChange}
+                            readOnly
                           />
                           <InputGroupAddon addonType="append">
                             <Button
                               color="success"
-                              onClick={(e) =>
-                                handleToggle(true, e.target.value)
-                              }
+                              onClick={e => handleToggle(true, e.target.value)}
                             >
                               +
                             </Button>
                           </InputGroupAddon>
-                          <InputGroupAddon addonType="append">
-                            <Button color="primary" onClick={submitBid}>
-                              BID
-                            </Button>
-                          </InputGroupAddon>
+                          <Button
+                            color="primary"
+                            onClick={submitBid}
+                            style={{ marginLeft: 10 }}
+                          >
+                            BID
+                          </Button>
                         </InputGroup>
                       </Form>
                     )}
