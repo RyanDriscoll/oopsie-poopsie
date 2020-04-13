@@ -27,7 +27,8 @@ import {
   getScore,
   calculateGameScore,
   getWinner,
-  getAvailableTricks
+  getAvailableTricks,
+  handleDirtyGame
 } from "../../utils/helpers"
 import Spinner from "../../components/Spinner"
 import Players from "../../components/Players"
@@ -49,7 +50,7 @@ class Game extends Component {
     this.state = {
       loading: false,
       game: null,
-      players: [],
+      players: {},
       playerId: null,
       playerName: "",
       hand: [],
@@ -144,7 +145,10 @@ class Game extends Component {
           const player = data.val()
           this.setState(prevState => {
             const newState = {
-              players: [...prevState.players, player]
+              players: {
+                ...prevState.players,
+                [player.playerId]: player
+              }
             }
             if (player.host && player.playerId === playerId) {
               newState.isHost = true
@@ -155,15 +159,12 @@ class Game extends Component {
         this.playersRef.on("child_changed", data => {
           const player = data.val()
           this.setState(prevState => {
-            const updatedPlayers = [...prevState.players]
-            const index = updatedPlayers.findIndex(
-              p => p.playerId === player.playerId
-            )
-            updatedPlayers[index] = player
-            const newState = {
-              players: updatedPlayers
+            return {
+              players: {
+                ...prevState.players,
+                [player.playerId]: player
+              }
             }
-            return newState
           })
         })
       ])
@@ -193,7 +194,6 @@ class Game extends Component {
         this.gameRef.on("child_changed", data => {
           let value = data.val()
           const key = data.key
-          // handle end of game status: 'over'
           this.setState(prevState =>
             key === "roundId"
               ? {
@@ -333,17 +333,52 @@ class Game extends Component {
           if (initialDataLoaded) {
             const bid = data.val()
             const playerId = data.key
-            this.setState(prevState => ({
-              bids: {
-                ...prevState.bids,
-                [playerId]: bid
+            this.setState(
+              prevState => ({
+                bids: {
+                  ...prevState.bids,
+                  [playerId]: bid
+                }
+              }),
+              () => {
+                this.setState(prevState => {
+                  const { game, bids, players, bid } = prevState
+                  const { numCards, dirty } = game
+                  let newBid = Number(bid)
+                  while (
+                    dirty &&
+                    !handleDirtyGame({ value: newBid, numCards, bids, players })
+                  ) {
+                    newBid = newBid + 1
+                  }
+                  if (newBid >= 0 && newBid <= numCards) {
+                    return { bid: newBid }
+                  }
+                  return {}
+                })
               }
-            }))
+            )
           }
         }),
         this.bidRef.once("value").then(data => {
           const bids = data.val()
-          this.setState({ bids })
+          this.setState({ bids }, () => {
+            this.setState(prevState => {
+              const { game, bids, players, bid } = prevState
+              const { numCards, dirty } = game
+              let newBid = Number(bid)
+              while (
+                dirty &&
+                !handleDirtyGame({ value: newBid, numCards, bids, players })
+              ) {
+                newBid = newBid + 1
+              }
+              if (newBid >= 0 && newBid <= numCards) {
+                return { bid: newBid }
+              }
+              return {}
+            })
+          })
           initialDataLoaded = true
         })
       ])
@@ -438,7 +473,7 @@ class Game extends Component {
         if (leader) {
           leader = leader.playerId
         }
-        const nextPlayerId = getNextPlayer({ playerId, players })
+        const nextPlayerId = players[playerId].nextPlayer
         const body = {
           playerId,
           nextPlayerId,
@@ -454,7 +489,7 @@ class Game extends Component {
         await playCard(body)
 
         if (nextRound) {
-          this.nextRound()
+          await this.nextRound()
         }
       }
       this.setState({ loading: false })
@@ -472,9 +507,9 @@ class Game extends Component {
         numCards: nc,
         roundNum: rn,
         descending: desc,
+        dealer: oldDealer,
         gameId,
         numRounds,
-        dealer,
         score,
         roundId,
         noBidPoints
@@ -486,23 +521,16 @@ class Game extends Component {
         descending = false
         numCards = 2
       }
-      const gameScore = calculateGameScore({
-        players,
-        bids,
-        roundScore,
-        score,
-        noBidPoints
-      })
-
+      const dealer = players[oldDealer].nextPlayer
       const gameOver = roundNum > numRounds
       const body = {
         roundNum,
         numRounds,
         numCards,
         descending,
-        players,
         gameId,
-        gameScore,
+        noBidPoints,
+        roundId,
         gameOver,
         dealer
       }
@@ -519,7 +547,7 @@ class Game extends Component {
       const { bid, playerId, game, bids, players } = this.state
       const { numPlayers, roundId } = game
       const allBidsIn = (Object.keys(bids || {}).length = numPlayers)
-      const nextPlayerId = getNextPlayer({ playerId, players })
+      const nextPlayerId = players[playerId].nextPlayer
       const body = {
         gameId,
         playerId,
@@ -530,49 +558,33 @@ class Game extends Component {
       }
 
       await submitBid(body)
-      this.setState({ bid: "", loading: false })
+      this.setState({ bid: 0, loading: false })
     } catch (error) {
       this.setState({ loading: false })
       console.error(`$$>>>>: Game -> error`, error)
     }
   }
 
-  handleDirtyGame = value => {
-    const { game, bids } = this.state
-    if (game.dirty) {
-      const wouldMakeClean = getAvailableTricks({
-        numCards: game.numCards,
-        bids
-      })
-      if (wouldMakeClean < 0) {
-        return true
-      }
-      return wouldMakeClean !== +value
-    }
-    return true
-  }
-
   handleChange = e => {
-    let { value, name } = e.target
-    if (
-      name !== "bid" ||
-      value === "" ||
-      (/^(?:[0-9]|[1-9]|10)$/.test(value) && this.handleDirtyGame(value))
-    ) {
-      this.setState({
-        [name]: value
-      })
-    }
+    const { value, name } = e.target
+    this.setState({
+      [name]: value
+    })
   }
 
   handleToggle = inc => {
     this.setState(prevState => {
-      let newBid = Number(prevState.bid)
+      const { game, bids, players, bid } = prevState
+      const { numCards, dirty } = game
+      let newBid = Number(bid)
       newBid = inc ? newBid + 1 : newBid - 1
-      while (!this.handleDirtyGame(newBid)) {
+      while (
+        dirty &&
+        !handleDirtyGame({ value: newBid, numCards, bids, players })
+      ) {
         newBid = inc ? newBid + 1 : newBid - 1
       }
-      if (newBid >= 0 && newBid <= prevState.hand.length) {
+      if (newBid >= 0 && newBid <= numCards) {
         return { bid: newBid }
       }
       return {}
@@ -639,7 +651,7 @@ class Game extends Component {
       leadSuit = trick.leadSuit
     }
 
-    const user = players.find(p => p.playerId === playerId)
+    const user = players[playerId]
     const userName = (user && user.name) || ""
 
     return (
@@ -733,8 +745,8 @@ class Game extends Component {
             roundScore={roundScore}
             trick={trick}
             bid={bid}
+            setBid={bid => this.setState({ bid })}
             dealer={dealer}
-            handleChange={this.handleChange}
             handleToggle={this.handleToggle}
             submitBid={this.submitBid}
             thisPlayer={playerId}
@@ -768,17 +780,17 @@ class Game extends Component {
             </Row>
           </ModalHeader>
           <ModalBody>
-            {players
+            {Object.values(players)
               .sort((a, b) => {
                 const aScore =
                   gameScore && gameScore[a.playerId] ? gameScore[a.playerId] : 0
                 const bScore =
                   gameScore && gameScore[b.playerId] ? gameScore[b.playerId] : 0
                 if (aScore < bScore) {
-                  return -1
+                  return 1
                 }
                 if (aScore > bScore) {
-                  return 1
+                  return -1
                 }
                 return 0
               })

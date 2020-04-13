@@ -77,8 +77,7 @@ export const getNextPlayer = ({ playerId, players }) => {
   return players[nextPlayerIndex].playerId
 }
 
-export const getWinner = ({ winner, players }) =>
-  players.find(p => p.playerId === winner).name
+export const getWinner = ({ winner, players }) => players[winner].name
 
 export const calculateGameScore = ({
   players,
@@ -88,7 +87,7 @@ export const calculateGameScore = ({
   noBidPoints
 }) => {
   const newGameScore = { ...score }
-  players.forEach(player => {
+  Object.values(players).forEach(player => {
     const bidsMade = bids[player.playerId]
     let tricksWon = roundScore[player.playerId] || 0
     let newScore = tricksWon && !noBidPoints ? tricksWon : 0
@@ -109,3 +108,19 @@ export const calculateGameScore = ({
 
 export const getAvailableTricks = ({ numCards, bids }) =>
   numCards - Object.values(bids || {}).reduce((num, bid) => num + bid, 0)
+
+export const handleDirtyGame = ({ value, numCards, bids, players }) => {
+  const lastPlayer =
+    Object.keys(bids || {}).length + 1 === Object.keys(players || {}).length
+  if (lastPlayer) {
+    const wouldMakeClean = getAvailableTricks({
+      numCards,
+      bids
+    })
+    if (wouldMakeClean < 0) {
+      return true
+    }
+    return wouldMakeClean !== +value
+  }
+  return true
+}
