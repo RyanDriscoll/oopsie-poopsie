@@ -1,7 +1,6 @@
 import React, { createRef } from "react"
 import dynamic from "next/dynamic"
 import CombinedContext from "../context/CombinedContext"
-// import Notification from "react-web-notification"
 const Notification = dynamic(() => import("react-web-notification"), {
   ssr: false
 })
@@ -57,6 +56,7 @@ class NotificationController extends React.Component {
       <div>
         <Notification
           ignore={this.state.ignore}
+          askAgain={true}
           notSupported={this.handleNotSupported}
           onPermissionGranted={this.handlePermissionGranted}
           onPermissionDenied={this.handlePermissionDenied}
