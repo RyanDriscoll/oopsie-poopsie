@@ -58,8 +58,8 @@ const Players = ({
                 [styles.current_player_arrow]: isCurrent
               })}
             >
-              <Row>
-                <Col xs="5" sm="4">
+              <Row className={styles.player_row}>
+                <Col xs="4">
                   <div data-player-score={playerScore}>
                     <h2
                       className={classNames({
@@ -74,7 +74,11 @@ const Players = ({
                 </Col>
                 {bids && bids[playerId] != null ? (
                   <>
-                    <Col xs="3" sm="4">
+                    <Col
+                      xs="3"
+                      sm="4"
+                      className="d-flex justify-content-between align-items-center"
+                    >
                       <Row>
                         <Col xs="12" sm="6">
                           <h3>{`Bid: ${bids[playerId]}`}</h3>
@@ -84,7 +88,7 @@ const Players = ({
                         </Col>
                       </Row>
                     </Col>
-                    <Col xs="4">
+                    <Col xs="5" sm="4">
                       {trick && trick.cards && trick.cards[playerId] && (
                         <div className={styles.card}>
                           <img src={getSource(trick.cards[playerId].suit)} />
@@ -100,10 +104,10 @@ const Players = ({
                     </Col>
                   </>
                 ) : (
-                  <Col xs="2">
+                  <Col xs="7" sm="4">
                     {thisPlayer === playerId && currentPlayer === playerId && (
                       <Form>
-                        <InputGroup>
+                        <InputGroup className={styles.bid_container}>
                           <InputGroupAddon addonType="prepend">
                             <Button
                               color="danger"

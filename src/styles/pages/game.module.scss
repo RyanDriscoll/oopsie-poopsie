@@ -9,17 +9,31 @@
   }
 
   .info_row {
-    margin-bottom: 2vw;
+    margin-bottom: 6vw;
 
-    .lead_trump_container {
+    > div {
       display: flex;
       flex-direction: column;
       justify-content: center;
+
+      h4 {
+        &:nth-of-type(3) {
+          margin: 0;
+        }
+      }
+    }
+
+    @media only screen and (min-width: 768px) {
+      margin-bottom: 4vw;
+    }
+
+    .lead_trump_container {
       align-items: center;
 
       img {
-        height: 4vw;
+        height: 2.5vw;
         width: unset;
+        margin-top: 1vw;
       }
     }
   }

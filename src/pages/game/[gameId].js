@@ -686,24 +686,21 @@ class Game extends Component {
                 (status === "bid" ||
                   status === "play" ||
                   status === "over") && (
-                  <div className="d-flex-column justify-content-center">
+                  <>
                     <h4>{`ROUND: ${roundNum} of ${numRounds}`}</h4>
                     <h4>{`TOTAL TRICKS: ${numCards}`}</h4>
                     <h4>{`TRICKS AVAILABLE: ${getAvailableTricks({
                       numCards,
                       bids
                     })}`}</h4>
-                  </div>
+                  </>
                 )}
             </Col>
             <Col xs="2" className={styles.lead_trump_container}>
-              {/* <Row className="justify-content-end align-items-center"> */}
               {leadSuit && (
                 <>
                   <h3>LEAD</h3>
-                  {/* <div className={styles.img_container}> */}
                   <img src={getSource(leadSuit)} />
-                  {/* </div> */}
                 </>
               )}
             </Col>
@@ -711,12 +708,9 @@ class Game extends Component {
               {trump && (
                 <>
                   <h3>TRUMP</h3>
-                  {/* <div className={styles.img_container}> */}
                   <img src={getSource(trump)} />
-                  {/* </div> */}
                 </>
               )}
-              {/* </Row> */}
             </Col>
           </Row>
           {!playerId && (

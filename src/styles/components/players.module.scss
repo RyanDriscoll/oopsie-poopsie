@@ -7,14 +7,16 @@ ul.players {
 
   li {
     position: relative;
-    margin-bottom: 25px;
+    margin-bottom: 10vw;
 
     @media only screen and (min-width: 768px) {
+      margin-bottom: 3vw;
       &.current_player_arrow {
         &::before {
           position: absolute;
           content: "-->";
-          left: -6%;
+          left: -6vw;
+          bottom: 25%;
           color: $red;
           font-family: $font-bold;
           font-size: 2vw;
@@ -47,11 +49,10 @@ ul.players {
       color: $red;
       font-family: $font-bold;
       font-size: 2vw;
-      line-height: 3.5vw;
+      line-height: 170%;
 
       @media only screen and (min-width: 768px) {
         font-size: 1vw;
-        line-height: 2.3vw;
       }
     }
 
@@ -86,10 +87,10 @@ ul.players {
       justify-content: center;
       align-items: center;
       border: none;
-      padding-bottom: 8px;
 
       h2 {
         margin: 0 0 0 5px;
+        font-size: 3vw;
       }
 
       img {
