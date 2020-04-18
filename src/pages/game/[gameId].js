@@ -63,7 +63,7 @@ class Game extends Component {
       roundScore: {},
       showScore: false,
       showYourTurn: false,
-      trump: "C"
+      trump: null
     }
 
     this.gameRef
