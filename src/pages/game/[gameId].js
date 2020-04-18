@@ -63,7 +63,7 @@ class Game extends Component {
       roundScore: {},
       showScore: false,
       showYourTurn: false,
-      trump: ""
+      trump: "C"
     }
 
     this.gameRef
@@ -656,8 +656,8 @@ class Game extends Component {
 
     return (
       <>
-        <Container className={styles.game_page}>
-          <Row className="mb-5" style={{ height: 65 }}>
+        <div className={styles.game_page}>
+          <Row className={styles.info_row}>
             <Col xs="4">
               {name && <h2 style={{ textDecoration: "underline" }}>{name}</h2>}
             </Col>
@@ -673,47 +673,31 @@ class Game extends Component {
                 (status === "bid" ||
                   status === "play" ||
                   status === "over") && (
-                  <div className="d-flex-column justify-content-center">
-                    <h3
-                      style={{ fontSize: 12 }}
-                    >{`ROUND: ${roundNum} of ${numRounds}`}</h3>
-                    <h3
-                      style={{ fontSize: 12 }}
-                    >{`TOTAL TRICKS: ${numCards}`}</h3>
-                    <h3
-                      style={{ fontSize: 12 }}
-                    >{`TRICKS AVAILABLE: ${getAvailableTricks({
+                  <>
+                    <h4>{`ROUND: ${roundNum} of ${numRounds}`}</h4>
+                    <h4>{`TOTAL TRICKS: ${numCards}`}</h4>
+                    <h4>{`TRICKS AVAILABLE: ${getAvailableTricks({
                       numCards,
                       bids
-                    })}`}</h3>
-                  </div>
+                    })}`}</h4>
+                  </>
                 )}
             </Col>
-            <Col xs="4">
-              <Row className="justify-content-end align-items-center">
-                {leadSuit && (
-                  <>
-                    <h3 className="mr-3">LEAD: </h3>
-                    <div style={{ width: 50, marginRight: 50 }}>
-                      <img
-                        style={{ objectFit: "contain" }}
-                        src={getSource(leadSuit)}
-                      />
-                    </div>
-                  </>
-                )}
-                {trump && (
-                  <>
-                    <h3 className="mr-3">TRUMP: </h3>
-                    <div style={{ width: 50 }}>
-                      <img
-                        style={{ objectFit: "contain" }}
-                        src={getSource(trump)}
-                      />
-                    </div>
-                  </>
-                )}
-              </Row>
+            <Col xs="2" className={styles.lead_trump_container}>
+              {leadSuit && (
+                <>
+                  <h3>LEAD</h3>
+                  <img src={getSource(leadSuit)} />
+                </>
+              )}
+            </Col>
+            <Col xs="2" className={styles.lead_trump_container}>
+              {trump && (
+                <>
+                  <h3>TRUMP</h3>
+                  <img src={getSource(trump)} />
+                </>
+              )}
             </Col>
           </Row>
           {!playerId && (
@@ -753,7 +737,7 @@ class Game extends Component {
             gameScore={gameScore}
             status={status}
           />
-        </Container>
+        </div>
         <CardRow cards={hand} playCard={this.playCard} />
         <Modal
           isOpen={Boolean(winner)}

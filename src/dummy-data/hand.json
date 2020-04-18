@@ -1,0 +1,72 @@
+[
+  {
+    "cardId": "-M4FYSrPUBqHTBIEXwXr",
+    "playerId": "-M4FYSC-gPg1SQOBQReE",
+    "rank": 5,
+    "suit": "C",
+    "value": "6"
+  },
+  {
+    "cardId": "-M4FYSrQwUW7NKkagPEZ",
+    "playerId": "-M4FYSC-gPg1SQOBQReE",
+    "rank": 6,
+    "suit": "C",
+    "value": "7"
+  },
+  {
+    "cardId": "-M4FYSrQwUW7NKkagPE_",
+    "playerId": "-M4FYSC-gPg1SQOBQReE",
+    "rank": 13,
+    "suit": "C",
+    "value": "A"
+  },
+  {
+    "cardId": "-M4FYSrQwUW7NKkagPEa",
+    "playerId": "-M4FYSC-gPg1SQOBQReE",
+    "rank": 6,
+    "suit": "S",
+    "value": "7"
+  },
+  {
+    "cardId": "-M4FYSrQwUW7NKkagPEb",
+    "playerId": "-M4FYSC-gPg1SQOBQReE",
+    "rank": 9,
+    "suit": "S",
+    "value": "10"
+  },
+  {
+    "cardId": "-M4FYSrQwUW7NKkagPEc",
+    "playerId": "-M4FYSC-gPg1SQOBQReE",
+    "rank": 10,
+    "suit": "S",
+    "value": "J"
+  },
+  {
+    "cardId": "-M4FYSrQwUW7NKkagPEd",
+    "playerId": "-M4FYSC-gPg1SQOBQReE",
+    "rank": 11,
+    "suit": "S",
+    "value": "Q"
+  },
+  {
+    "cardId": "-M4FYSrQwUW7NKkagPEe",
+    "playerId": "-M4FYSC-gPg1SQOBQReE",
+    "rank": 13,
+    "suit": "S",
+    "value": "A"
+  },
+  {
+    "cardId": "-M4FYSrQwUW7NKkagPEf",
+    "playerId": "-M4FYSC-gPg1SQOBQReE",
+    "rank": 4,
+    "suit": "D",
+    "value": "5"
+  },
+  {
+    "cardId": "-M4FYSrQwUW7NKkagPEg",
+    "playerId": "-M4FYSC-gPg1SQOBQReE",
+    "rank": 10,
+    "suit": "D",
+    "value": "J"
+  }
+]

@@ -25,33 +25,29 @@ const Header = () => {
     <>
       <header>
         <div className={styles.navigation_wrapper}>
-          <div className="logo">
-            <Link href="/">
-              <a>
-                <img src="/images/poop.png" alt="Oh Shit Logo" />
-              </a>
-            </Link>
-          </div>
+          <Link href="/">
+            <a className={styles.img_container}>
+              <img src="/images/poop.png" alt="Oh Shit Logo" />
+            </a>
+          </Link>
           <div className={styles.title}>
             <h1>oopsie poopsie...</h1>
           </div>
 
-          <div className={styles.space}></div>
           <div className={styles.rules}>
             <div
               title={`Notification sounds ${mute ? "muted" : "active"}`}
               onClick={handleClick}
-              style={{ cursor: "pointer", marginRight: 15 }}
             >
               {mute ? (
-                <Mute style={{ width: 25 }} />
+                <Mute className={styles.sound} />
               ) : (
-                <Sound style={{ width: 25 }} />
+                <Sound className={styles.sound} />
               )}
             </div>
-            <Button onClick={toggleRules}>
+            <button onClick={toggleRules}>
               <h4>rules</h4>
-            </Button>
+            </button>
           </div>
         </div>
       </header>

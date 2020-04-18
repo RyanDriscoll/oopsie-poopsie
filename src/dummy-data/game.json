@@ -1,0 +1,15 @@
+{
+  "currentPlayer": "0",
+  "dealer": "1",
+  "descending": true,
+  "dirty": false,
+  "gameId": "0",
+  "name": "driscoll eats babies",
+  "numCards": 10,
+  "numPlayers": 1,
+  "numRounds": 19,
+  "roundId": "0",
+  "roundNum": 1,
+  "status": "play",
+  "timestamp": "2020-04-06T16:34:54.525Z"
+}

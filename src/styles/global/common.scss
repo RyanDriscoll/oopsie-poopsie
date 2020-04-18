@@ -4,14 +4,6 @@ body {
   font-size: 18px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  @media only screen and (max-width: 767px) {
-    overflow: hidden;
-  }
-}
-
-header {
-  padding: 15px;
 }
 
 img,
@@ -21,30 +13,30 @@ svg {
 
 h1 {
   font-family: $font-bold;
-  font-size: 10vw;
+  font-size: 6vw;
   line-height: 1;
   margin-bottom: 40px;
   letter-spacing: -0.02em;
 
   @media only screen and (min-width: 768px) {
-    font-size: 5vw;
-  }
-
-  @media only screen and (min-width: 1460px) {
-    font-size: 4.4vw;
-  }
-
-  @media only screen and (min-width: 1600px) {
-    font-size: 4.2vw;
-  }
-
-  @media only screen and (min-width: 1700px) {
     font-size: 4vw;
   }
 
-  @media only screen and (min-width: 1800px) {
-    font-size: 3.8vw;
-  }
+  // @media only screen and (min-width: 1460px) {
+  //   font-size: 4.4vw;
+  // }
+
+  // @media only screen and (min-width: 1600px) {
+  //   font-size: 4.2vw;
+  // }
+
+  // @media only screen and (min-width: 1700px) {
+  //   font-size: 4vw;
+  // }
+
+  // @media only screen and (min-width: 1800px) {
+  //   font-size: 3.8vw;
+  // }
 
   span {
     display: block;
@@ -68,13 +60,30 @@ h1 {
 
 h2 {
   font-family: $font-bold;
-  font-size: 30px;
-  height: 38px;
+  font-size: 4vw;
+  margin: 0;
+
+  @media only screen and (min-width: 768px) {
+    font-size: 2vw;
+  }
 }
 
 h3 {
   font-family: $font-bold;
-  font-size: 18px;
+  font-size: 2.9vw;
+  margin: 0;
+
+  @media only screen and (min-width: 768px) {
+    font-size: 1.5vw;
+  }
+}
+
+h4 {
+  font-size: 1.5vw;
+
+  @media only screen and (min-width: 768px) {
+    font-size: 1vw;
+  }
 }
 
 a {
@@ -95,7 +104,6 @@ input {
     font-family: $font-bold;
     border: 0;
     line-height: 30px;
-    // border-radius: 15px;
     padding: 3px 30px;
     font-size: 14px;
     width: 100%;
@@ -111,45 +119,27 @@ input {
   border-radius: 0;
 }
 
-// .btn {
-//   font-family: $font-bold;
-//   border: 0;
-//   line-height: 30px;
-//   border-radius: 15px;
-//   padding: 3px 30px;
-//   font-size: 14px;
-//   width: 100%;
-//   margin-bottom: 1rem;
-
-//   &:hover {
-//     background-color: $dark-gray;
-//   }
-
-//   &.btn-lg {
-//     font-size: 26px;
-//     padding: 10px 30px;
-//     height: 50px;
-//     border-radius: 25px;
-//   }
-// }
-
-span.bold {
-  font-family: $font-bold;
-}
-
 header {
-  text-align: right;
+  padding: 2vw;
+  text-align: center;
   border-bottom: 1px solid #f7f7f7;
-  margin-bottom: 40px;
+  margin-bottom: 3vw;
+
+  @media only screen and (min-width: 768px) {
+    margin-bottom: 1.5vw;
+  }
 
   .logo {
-    max-width: 60px;
-    margin: 20px;
+    max-width: 30px;
+    float: left;
+
+    @media only screen and (min-width: 768px) {
+      max-width: 60px;
+    }
   }
 
   button,
   a {
-    line-height: 75px;
     background: transparent;
     border: 0px;
     color: $red;
@@ -173,121 +163,6 @@ header {
     background-color: $black;
     display: inline-block;
   }
-}
-
-.mobile-warning {
-  position: fixed;
-  z-index: 9999;
-  background-color: $white;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  text-align: center;
-
-  .container,
-  .row {
-    height: 100%;
-    position: relative;
-  }
-
-  .warning-cont {
-    position: absolute;
-    left: 15px;
-    right: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-  }
-
-  svg,
-  img {
-    max-width: 70%;
-    margin-bottom: 24px;
-  }
-
-  p {
-    font-size: 22px;
-    max-width: 100%;
-  }
-
-  @media only screen and (min-width: 768px) {
-    display: none;
-  }
-}
-
-[data-tooltip],
-.tooltip {
-  position: relative;
-  cursor: pointer;
-}
-
-/* Base styles for the entire tooltip */
-[data-tooltip]:before,
-[data-tooltip]:after,
-.tooltip:before,
-.tooltip:after {
-  top: 100%;
-  bottom: auto;
-  position: absolute;
-  visibility: hidden;
-  opacity: 0;
-  -webkit-transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out,
-    -webkit-transform 0.2s ease-out;
-  -moz-transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out,
-    -moz-transform 0.2s ease-out;
-  transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out,
-    transform 0.2s ease-out;
-  -webkit-transform: translate3d(0, 0, 0);
-  -moz-transform: translate3d(0, 0, 0);
-  transform: translate3d(0, 0, 0);
-  pointer-events: none;
-}
-
-/* Show the entire tooltip on hover and focus */
-[data-tooltip]:hover:before,
-[data-tooltip]:hover:after,
-[data-tooltip]:focus:before,
-[data-tooltip]:focus:after,
-.tooltip:hover:before,
-.tooltip:hover:after,
-.tooltip:focus:before,
-.tooltip:focus:after {
-  visibility: visible;
-  opacity: 1;
-  -webkit-transform: translateY(12px);
-  -moz-transform: translateY(12px);
-  transform: translateY(12px);
-}
-
-/* Base styles for the tooltip's directional arrow */
-.tooltip:before,
-[data-tooltip]:before {
-  z-index: 1001;
-  border: 6px solid transparent;
-  background: transparent;
-  content: "";
-  left: 2px;
-  margin-top: -12px;
-  margin-bottom: 0;
-  border-top-color: transparent;
-  border-bottom-color: $red;
-}
-
-/* Base styles for the tooltip's content area */
-.tooltip:after,
-[data-tooltip]:after {
-  z-index: 1000;
-  padding: 10px;
-  width: 300px;
-  background-color: $red;
-  font-family: $font-bold;
-  color: $white;
-  content: attr(data-tooltip);
-  font-size: 16px;
-  line-height: 1.2;
-  left: calc(50% - 150px);
-  border-radius: 5px;
-  text-align: left;
 }
 
 .spinner-container {

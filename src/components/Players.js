@@ -58,7 +58,7 @@ const Players = ({
                 [styles.current_player_arrow]: isCurrent
               })}
             >
-              <Row>
+              <Row className={styles.player_row}>
                 <Col xs="4">
                   <div data-player-score={playerScore}>
                     <h2
@@ -74,14 +74,22 @@ const Players = ({
                 </Col>
                 {bids && bids[playerId] != null ? (
                   <>
-                    <Col xs="2">
-                      <h2>{`Bid: ${bids[playerId]}`}</h2>
+                    <Col
+                      xs="3"
+                      sm="4"
+                      className="d-flex justify-content-between align-items-center"
+                    >
+                      <Row>
+                        <Col xs="12" sm="6">
+                          <h3>{`Bid: ${bids[playerId]}`}</h3>
+                        </Col>
+                        <Col xs="12" sm="6">
+                          <h3>{`Won: ${roundScore[playerId] || "0"}`}</h3>
+                        </Col>
+                      </Row>
                     </Col>
-                    <Col xs="2">
-                      <h2>{`Won: ${roundScore[playerId] || "0"}`}</h2>
-                    </Col>
-                    {trick && trick.cards && trick.cards[playerId] && (
-                      <Col xs="2">
+                    <Col xs="5" sm="4">
+                      {trick && trick.cards && trick.cards[playerId] && (
                         <div className={styles.card}>
                           <img src={getSource(trick.cards[playerId].suit)} />
                           <h2
@@ -92,14 +100,14 @@ const Players = ({
                             {trick.cards[playerId].value}
                           </h2>
                         </div>
-                      </Col>
-                    )}
+                      )}
+                    </Col>
                   </>
                 ) : (
-                  <Col xs="2">
+                  <Col xs="7" sm="4">
                     {thisPlayer === playerId && currentPlayer === playerId && (
                       <Form>
-                        <InputGroup>
+                        <InputGroup className={styles.bid_container}>
                           <InputGroupAddon addonType="prepend">
                             <Button
                               color="danger"
