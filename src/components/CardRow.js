@@ -1,7 +1,6 @@
-import styles from "../styles/components/card-row.module.scss";
-import { getSource, getColor } from "../utils/helpers";
-
-export default ({ cards, playCard }) => {
+import styles from "../styles/components/card-row.module.scss"
+import { getSource, getColor } from "../utils/helpers"
+const CardRow = ({ cards, playCard }) => {
   return (
     <ul className={styles.card_row}>
       {cards &&
@@ -9,8 +8,8 @@ export default ({ cards, playCard }) => {
           <li
             key={card.cardId}
             onClick={e => {
-              e.preventDefault();
-              playCard(card);
+              e.preventDefault()
+              playCard(card)
             }}
           >
             <div>
@@ -20,5 +19,7 @@ export default ({ cards, playCard }) => {
           </li>
         ))}
     </ul>
-  );
-};
+  )
+}
+
+export default CardRow
