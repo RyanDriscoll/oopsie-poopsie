@@ -24,7 +24,7 @@ const CreateGame = ({ origin }) => {
   const [copySuccess, setCopySuccess] = useState("")
   const [dirty, setDirty] = useState(false)
   const [noBidPoints, setNoBidPoints] = useState(false)
-  const [numCards, setNumCards] = useState(10)
+  const [numCards, setNumCards] = useState(5)
 
   const gameUrlRef = useRef(null)
 
@@ -90,7 +90,7 @@ const CreateGame = ({ origin }) => {
             className="justify-content-center"
             style={{ position: "relative" }}
           >
-            <Col xs="7">
+            <Col xs="10" sm="7">
               <InputGroup>
                 <Input
                   value={url}
@@ -115,7 +115,7 @@ const CreateGame = ({ origin }) => {
         </>
       ) : (
         <Row className="justify-content-center">
-          <Col xs="6">
+          <Col xs="10" sm="7">
             <Form>
               <FormGroup>
                 <Label for="game">Game Name</Label>
@@ -140,7 +140,7 @@ const CreateGame = ({ origin }) => {
                   onChange={handleChange}
                 />
               </FormGroup>
-              <Col xs="6" className="p-0">
+              <Col xs="12" className="p-0">
                 <FormGroup>
                   <Label for="num-cards">Number of cards</Label>
                   <InputGroup>
@@ -179,9 +179,9 @@ const CreateGame = ({ origin }) => {
                     type="checkbox"
                     id="bid-checkbox"
                     checked={dirty}
-                    onChange={e => setDirty(!dirty)}
+                    onChange={() => setDirty(!dirty)}
                   />{" "}
-                  No clean bids
+                  Dirty bids only
                 </Label>
               </FormGroup>
 
@@ -191,9 +191,9 @@ const CreateGame = ({ origin }) => {
                     type="checkbox"
                     id="bid-point-checkbox"
                     checked={noBidPoints}
-                    onChange={e => setNoBidPoints(!noBidPoints)}
+                    onChange={() => setNoBidPoints(!noBidPoints)}
                   />{" "}
-                  No points for bogus bids
+                  No points for bad bids
                 </Label>
               </FormGroup>
 
