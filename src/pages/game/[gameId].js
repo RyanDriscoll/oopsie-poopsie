@@ -27,13 +27,22 @@ import {
   getScore,
   calculateGameScore,
   getWinner,
-  getAvailableTricks
+  getAvailableTricks,
+  handleDirtyGame
 } from "../../utils/helpers"
 import Spinner from "../../components/Spinner"
 import Players from "../../components/Players"
 import { withRouter } from "next/router"
 import ModalHeader from "reactstrap/lib/ModalHeader"
 import NotificationController from "../../components/NotificationController"
+import {
+  startGame,
+  playCard,
+  submitBid,
+  updatePlayer,
+  addPlayer,
+  nextRound
+} from "../../utils/api"
 
 class Game extends Component {
   constructor(props) {
@@ -79,66 +88,67 @@ class Game extends Component {
     this.trumpRef
   }
 
-  // async componentDidMount() {
-  //   try {
-  //     const { gameId } = this.props
-  //     const { game } = this.state
-  //     const playerId = localStorage.getItem(`oh-shit-game-${gameId}-player-id`)
-  //     this.setState({ playerId })
-  //     this.listenToPlayers(gameId, playerId)
-  //     if (playerId) {
-  //       // this.listenToGame({ gameId, playerId })
-  //       // await ref(`players/${playerId}`).update({ present: true, gameId })
-  //     }
-  //   } catch (error) {
-  //     console.error(`$$>>>>: Game -> componentDidMount -> error`, error)
-  //   }
-  // }
+  async componentDidMount() {
+    // try {
+    //   const { gameId } = this.props
+    //   const { game } = this.state
+    //   const playerId = localStorage.getItem(`oh-shit-game-${gameId}-player-id`)
+    //   this.setState({ playerId })
+    //   this.listenToPlayers(gameId, playerId)
+    //   if (playerId) {
+    //     this.listenToGame({ gameId, playerId })
+    //     await updatePlayer({ playerId, gameId, present: true })
+    //   }
+    // } catch (error) {
+    //   console.error(`$$>>>>: Game -> componentDidMount -> error`, error)
+    // }
+  }
 
-  // async componentWillUnmount() {
-  //   const { gameId } = this.props
-  //   if (this.gameRef) {
-  //     this.gameRef.off()
-  //   }
-  //   if (this.playersRef) {
-  //     this.playersRef.off()
-  //   }
-  //   if (this.handRef) {
-  //     this.handRef.off()
-  //   }
-  //   if (this.bidRef) {
-  //     this.bidRef.off()
-  //   }
-  //   if (this.trickRef) {
-  //     this.trickRef.off()
-  //   }
-  //   if (this.trumpRef) {
-  //     this.trumpRef.off()
-  //   }
-  //   const { playerId } = this.state
-  //   if (playerId) {
-  //     await ref(`players/${playerId}`).update({ present: false, gameId })
-  //   }
-  // }
+  async componentWillUnmount() {
+    // const { gameId } = this.props
+    // if (this.gameRef) {
+    //   this.gameRef.off()
+    // }
+    // if (this.playersRef) {
+    //   this.playersRef.off()
+    // }
+    // if (this.handRef) {
+    //   this.handRef.off()
+    // }
+    // if (this.bidRef) {
+    //   this.bidRef.off()
+    // }
+    // if (this.trickRef) {
+    //   this.trickRef.off()
+    // }
+    // if (this.trumpRef) {
+    //   this.trumpRef.off()
+    // }
+    // const { playerId } = this.state
+    // if (playerId) {
+    //   await updatePlayer({ playerId, gameId, present: true })
+    // }
+  }
 
-  // componentDidUpdate(_, prevState) {
-  //   const { playerId } = this.state
-  //   if (playerId && prevState.playerId !== playerId) {
-  //     this.listenForWindowClose(playerId)
-  //   }
-  // }
+  componentDidUpdate(_, prevState) {
+    // const { playerId } = this.state
+    // if (playerId && prevState.playerId !== playerId) {
+    //   this.listenForWindowClose(playerId)
+    // }
+  }
 
-  // listenForWindowClose = playerId => {
-  //   const { gameId } = this.props
-  //   window.addEventListener("beforeunload", event => {
-  //     // Cancel the event as stated by the standard.
-  //     event.preventDefault()
-  //     // Chrome requires returnValue to be set.
-  //     event.returnValue = ""
-
-  //     ref(`players/${playerId}`).update({ present: false, gameId })
-  //   })
-  // }
+  listenForWindowClose = playerId => {
+    // const { gameId } = this.props
+    // window.addEventListener("beforeunload", event => {
+    //   // Cancel the event as stated by the standard.
+    //   event.preventDefault()
+    //   // Chrome requires returnValue to be set.
+    //   event.returnValue = ""
+    // })
+    // window.addEventListener("unload", async event => {
+    //   await updatePlayer({ playerId, gameId, present: false })
+    // })
+  }
 
   listenToPlayers = async (gameId, playerId) => {
     try {
@@ -148,7 +158,10 @@ class Game extends Component {
       //     const player = data.val()
       //     this.setState(prevState => {
       //       const newState = {
-      //         players: [...prevState.players, player]
+      //         players: {
+      //           ...prevState.players,
+      //           [player.playerId]: player
+      //         }
       //       }
       //       if (player.host && player.playerId === playerId) {
       //         newState.isHost = true
@@ -159,15 +172,12 @@ class Game extends Component {
       //   this.playersRef.on("child_changed", data => {
       //     const player = data.val()
       //     this.setState(prevState => {
-      //       const updatedPlayers = [...prevState.players]
-      //       const index = updatedPlayers.findIndex(
-      //         p => p.playerId === player.playerId
-      //       )
-      //       updatedPlayers[index] = player
-      //       const newState = {
-      //         players: updatedPlayers
+      //       return {
+      //         players: {
+      //           ...prevState.players,
+      //           [player.playerId]: player
+      //         }
       //       }
-      //       return newState
       //     })
       //   })
       // ])
@@ -197,7 +207,6 @@ class Game extends Component {
       //   this.gameRef.on("child_changed", data => {
       //     let value = data.val()
       //     const key = data.key
-      //     // handle end of game status: 'over'
       //     this.setState(prevState =>
       //       key === "roundId"
       //         ? {
@@ -327,30 +336,65 @@ class Game extends Component {
 
   listenToBid = async roundId => {
     try {
-      // if (this.bidRef) {
-      //   this.bidRef.off()
-      // }
-      // this.bidRef = ref(`rounds/${roundId}/bids`)
-      // let initialDataLoaded = false
-      // await Promise.all([
-      //   this.bidRef.on("child_added", data => {
-      //     if (initialDataLoaded) {
-      //       const bid = data.val()
-      //       const playerId = data.key
-      //       this.setState(prevState => ({
-      //         bids: {
-      //           ...prevState.bids,
-      //           [playerId]: bid
-      //         }
-      //       }))
-      //     }
-      //   }),
-      //   this.bidRef.once("value").then(data => {
-      //     const bids = data.val()
-      //     this.setState({ bids })
-      //     initialDataLoaded = true
-      //   })
-      // ])
+      if (this.bidRef) {
+        this.bidRef.off()
+      }
+      this.bidRef = ref(`rounds/${roundId}/bids`)
+      let initialDataLoaded = false
+      await Promise.all([
+        this.bidRef.on("child_added", data => {
+          if (initialDataLoaded) {
+            const bid = data.val()
+            const playerId = data.key
+            this.setState(
+              prevState => ({
+                bids: {
+                  ...prevState.bids,
+                  [playerId]: bid
+                }
+              }),
+              () => {
+                this.setState(prevState => {
+                  const { game, bids, players, bid } = prevState
+                  const { numCards, dirty } = game
+                  let newBid = Number(bid)
+                  while (
+                    dirty &&
+                    !handleDirtyGame({ value: newBid, numCards, bids, players })
+                  ) {
+                    newBid = newBid + 1
+                  }
+                  if (newBid >= 0 && newBid <= numCards) {
+                    return { bid: newBid }
+                  }
+                  return {}
+                })
+              }
+            )
+          }
+        }),
+        this.bidRef.once("value").then(data => {
+          const bids = data.val()
+          this.setState({ bids }, () => {
+            this.setState(prevState => {
+              const { game, bids, players, bid } = prevState
+              const { numCards, dirty } = game
+              let newBid = Number(bid)
+              while (
+                dirty &&
+                !handleDirtyGame({ value: newBid, numCards, bids, players })
+              ) {
+                newBid = newBid + 1
+              }
+              if (newBid >= 0 && newBid <= numCards) {
+                return { bid: newBid }
+              }
+              return {}
+            })
+          })
+          initialDataLoaded = true
+        })
+      ])
     } catch (error) {
       console.error(`$$>>>>: error`, error)
     }
@@ -370,21 +414,17 @@ class Game extends Component {
 
   addPlayer = async () => {
     try {
-      // this.setState({ loading: true })
-      // const { gameId } = this.props
-      // const { playerName } = this.state
-      // const playerRef = ref("players").push()
-      // const playerId = playerRef.key
-      // await playerRef.update({
-      //   name: playerName,
-      //   gameId,
-      //   playerId,
-      //   present: true
-      // })
-      // localStorage.setItem(`oh-shit-game-${gameId}-player-id`, playerId)
-      // this.setState({ playerId })
-      // // this.listenToGame({ gameId, playerId })
-      // this.setState({ loading: false })
+      this.setState({ loading: true })
+      const { gameId } = this.props
+      const { playerName } = this.state
+      const response = await addPlayer({ playerName, gameId })
+      if (response.ok) {
+        const { playerId } = await response.json()
+        localStorage.setItem(`oh-shit-game-${gameId}-player-id`, playerId)
+        this.setState({ playerId })
+        this.listenToGame({ gameId, playerId })
+        this.setState({ loading: false })
+      }
     } catch (error) {
       this.setState({ loading: false })
       console.error(`$$>>>>: Game -> addPlayer -> error`, error)
@@ -395,17 +435,11 @@ class Game extends Component {
     try {
       this.setState({ loading: true })
       const { gameId } = this.props
-      let { players } = this.state
-      const response = await fetch(
-        "https://us-central1-oh-shit-ac7c3.cloudfunctions.net/api/start-game",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ gameId, players })
-        }
-      )
+      let {
+        players,
+        game: { numCards }
+      } = this.state
+      await startGame({ gameId, players, numCards })
       this.setState({ loading: false })
     } catch (error) {
       this.setState({ loading: false })
@@ -452,30 +486,23 @@ class Game extends Component {
         if (leader) {
           leader = leader.playerId
         }
-        const nextPlayerId = getNextPlayer({ playerId, players })
-        await fetch(
-          `https://us-central1-oh-shit-ac7c3.cloudfunctions.net/api/play-card`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              playerId,
-              nextPlayerId,
-              card,
-              leader,
-              allCardsIn,
-              gameId: game.gameId,
-              roundId: game.roundId,
-              trickId: trick.trickId,
-              leadSuit,
-              nextRound
-            })
-          }
-        )
+        const nextPlayerId = players[playerId].nextPlayer
+        const body = {
+          playerId,
+          nextPlayerId,
+          card,
+          leader,
+          allCardsIn,
+          gameId: game.gameId,
+          roundId: game.roundId,
+          trickId: trick.trickId,
+          leadSuit,
+          nextRound
+        }
+        await playCard(body)
+
         if (nextRound) {
-          this.nextRound()
+          await this.nextRound()
         }
       }
       this.setState({ loading: false })
@@ -493,11 +520,12 @@ class Game extends Component {
         numCards: nc,
         roundNum: rn,
         descending: desc,
+        dealer: oldDealer,
         gameId,
         numRounds,
-        dealer,
         score,
-        roundId
+        roundId,
+        noBidPoints
       } = game
       let descending = desc
       const roundNum = rn + 1
@@ -506,35 +534,20 @@ class Game extends Component {
         descending = false
         numCards = 2
       }
-      const gameScore = calculateGameScore({
-        players,
-        bids,
-        roundScore,
-        score
-      })
-
+      const dealer = players[oldDealer].nextPlayer
       const gameOver = roundNum > numRounds
-
-      await fetch(
-        `https://us-central1-oh-shit-ac7c3.cloudfunctions.net/api/next-round`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            roundNum,
-            numRounds,
-            numCards,
-            descending,
-            players,
-            gameId,
-            gameScore,
-            gameOver,
-            dealer
-          })
-        }
-      )
+      const body = {
+        roundNum,
+        numRounds,
+        numCards,
+        descending,
+        gameId,
+        noBidPoints,
+        roundId,
+        gameOver,
+        dealer
+      }
+      await nextRound(body)
     } catch (error) {
       console.error(`$$>>>>: nextRound -> error`, error)
     }
@@ -547,67 +560,44 @@ class Game extends Component {
       const { bid, playerId, game, bids, players } = this.state
       const { numPlayers, roundId } = game
       const allBidsIn = (Object.keys(bids || {}).length = numPlayers)
-      const nextPlayerId = getNextPlayer({ playerId, players })
-      const response = await fetch(
-        `https://us-central1-oh-shit-ac7c3.cloudfunctions.net/api/submit-bid`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            gameId,
-            playerId,
-            nextPlayerId,
-            bid,
-            allBidsIn,
-            roundId
-          })
-        }
-      )
-      this.setState({ bid: "", loading: false })
+      const nextPlayerId = players[playerId].nextPlayer
+      const body = {
+        gameId,
+        playerId,
+        nextPlayerId,
+        bid,
+        allBidsIn,
+        roundId
+      }
+
+      await submitBid(body)
+      this.setState({ bid: 0, loading: false })
     } catch (error) {
       this.setState({ loading: false })
       console.error(`$$>>>>: Game -> error`, error)
     }
   }
 
-  handleDirtyGame = value => {
-    const { game, bids } = this.state
-    if (game.dirty) {
-      const wouldMakeClean = getAvailableTricks({
-        numCards: game.numCards,
-        bids
-      })
-      if (wouldMakeClean < 0) {
-        return true
-      }
-      return wouldMakeClean !== +value
-    }
-    return true
-  }
-
   handleChange = e => {
-    let { value, name } = e.target
-    if (
-      name !== "bid" ||
-      value === "" ||
-      (/^(?:[0-9]|[1-9]|10)$/.test(value) && this.handleDirtyGame(value))
-    ) {
-      this.setState({
-        [name]: value
-      })
-    }
+    const { value, name } = e.target
+    this.setState({
+      [name]: value
+    })
   }
 
   handleToggle = inc => {
     this.setState(prevState => {
-      let newBid = Number(prevState.bid)
+      const { game, bids, players, bid } = prevState
+      const { numCards, dirty } = game
+      let newBid = Number(bid)
       newBid = inc ? newBid + 1 : newBid - 1
-      while (!this.handleDirtyGame(newBid)) {
+      while (
+        dirty &&
+        !handleDirtyGame({ value: newBid, numCards, bids, players })
+      ) {
         newBid = inc ? newBid + 1 : newBid - 1
       }
-      if (newBid >= 0 && newBid <= prevState.hand.length) {
+      if (newBid >= 0 && newBid <= numCards) {
         return { bid: newBid }
       }
       return {}
@@ -674,13 +664,13 @@ class Game extends Component {
       leadSuit = trick.leadSuit
     }
 
-    const user = players.find(p => p.playerId === playerId)
+    const user = players[playerId]
     const userName = (user && user.name) || ""
 
     return (
       <>
-        <Container className={styles.game_page}>
-          <Row className="mb-5" style={{ height: 65 }}>
+        <div className={styles.game_page}>
+          <Row className={styles.info_row}>
             <Col xs="4">
               {name && <h2 style={{ textDecoration: "underline" }}>{name}</h2>}
             </Col>
@@ -697,46 +687,36 @@ class Game extends Component {
                   status === "play" ||
                   status === "over") && (
                   <div className="d-flex-column justify-content-center">
-                    <h3
-                      style={{ fontSize: 12 }}
-                    >{`ROUND: ${roundNum} of ${numRounds}`}</h3>
-                    <h3
-                      style={{ fontSize: 12 }}
-                    >{`TOTAL TRICKS: ${numCards}`}</h3>
-                    <h3
-                      style={{ fontSize: 12 }}
-                    >{`TRICKS AVAILABLE: ${getAvailableTricks({
+                    <h4>{`ROUND: ${roundNum} of ${numRounds}`}</h4>
+                    <h4>{`TOTAL TRICKS: ${numCards}`}</h4>
+                    <h4>{`TRICKS AVAILABLE: ${getAvailableTricks({
                       numCards,
                       bids
-                    })}`}</h3>
+                    })}`}</h4>
                   </div>
                 )}
             </Col>
-            <Col xs="4">
-              <Row className="justify-content-end align-items-center">
-                {leadSuit && (
-                  <>
-                    <h3 className="mr-3">LEAD: </h3>
-                    <div style={{ width: 50, marginRight: 50 }}>
-                      <img
-                        style={{ objectFit: "contain" }}
-                        src={getSource(leadSuit)}
-                      />
-                    </div>
-                  </>
-                )}
-                {trump && (
-                  <>
-                    <h3 className="mr-3">TRUMP: </h3>
-                    <div style={{ width: 50 }}>
-                      <img
-                        style={{ objectFit: "contain" }}
-                        src={getSource(trump)}
-                      />
-                    </div>
-                  </>
-                )}
-              </Row>
+            <Col xs="2" className={styles.lead_trump_container}>
+              {/* <Row className="justify-content-end align-items-center"> */}
+              {leadSuit && (
+                <>
+                  <h3>LEAD</h3>
+                  {/* <div className={styles.img_container}> */}
+                  <img src={getSource(leadSuit)} />
+                  {/* </div> */}
+                </>
+              )}
+            </Col>
+            <Col xs="2" className={styles.lead_trump_container}>
+              {trump && (
+                <>
+                  <h3>TRUMP</h3>
+                  {/* <div className={styles.img_container}> */}
+                  <img src={getSource(trump)} />
+                  {/* </div> */}
+                </>
+              )}
+              {/* </Row> */}
             </Col>
           </Row>
           {!playerId && (
@@ -746,6 +726,7 @@ class Game extends Component {
                   <FormGroup>
                     <Label for="name">User Name</Label>
                     <Input
+                      data-lpignore="true"
                       type="text"
                       name="playerName"
                       id="name"
@@ -767,15 +748,15 @@ class Game extends Component {
             roundScore={roundScore}
             trick={trick}
             bid={bid}
+            setBid={bid => this.setState({ bid })}
             dealer={dealer}
-            handleChange={this.handleChange}
             handleToggle={this.handleToggle}
             submitBid={this.submitBid}
             thisPlayer={playerId}
             gameScore={gameScore}
             status={status}
           />
-        </Container>
+        </div>
         <CardRow cards={hand} playCard={this.playCard} />
         <Modal
           isOpen={Boolean(winner)}
@@ -802,17 +783,17 @@ class Game extends Component {
             </Row>
           </ModalHeader>
           <ModalBody>
-            {players
+            {Object.values(players)
               .sort((a, b) => {
                 const aScore =
                   gameScore && gameScore[a.playerId] ? gameScore[a.playerId] : 0
                 const bScore =
                   gameScore && gameScore[b.playerId] ? gameScore[b.playerId] : 0
                 if (aScore < bScore) {
-                  return -1
+                  return 1
                 }
                 if (aScore > bScore) {
-                  return 1
+                  return -1
                 }
                 return 0
               })
@@ -850,23 +831,6 @@ class Game extends Component {
             </Row>
           </ModalBody>
         </Modal>
-        {/* <Modal
-          isOpen={showYourTurn}
-          toggle={() => this.setState({ showYourTurn: false })}
-          onOpened={() => {
-            setTimeout(() => {
-              this.setState({ showYourTurn: false })
-            }, 800)
-          }}
-        >
-          <Container>
-            <Row>
-              <Col>
-                <h2>your turn...</h2>
-              </Col>
-            </Row>
-          </Container>
-        </Modal> */}
         <Spinner loading={loading} />
         <NotificationController
           showNotification={showYourTurn}
