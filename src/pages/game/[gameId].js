@@ -15,7 +15,7 @@ import Col from "reactstrap/lib/Col"
 import Modal from "reactstrap/lib/Modal"
 import ModalBody from "reactstrap/lib/ModalBody"
 import CombinedContext from "../../context/CombinedContext"
-import { ref } from "../lib/firebase"
+import { ref } from "../../lib/firebase"
 import styles from "../../styles/pages/game.module.scss"
 import CardRow from "../../components/CardRow"
 import {
