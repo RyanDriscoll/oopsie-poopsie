@@ -24,91 +24,89 @@ ul.players {
       }
     }
 
-    form {
-      button,
-      input {
-        font-size: 2vw;
-        padding: 0 1.5vw;
+    button,
+    input {
+      font-size: 2vw;
+      padding: 0 1.5vw;
 
-        @media only screen and (min-width: 768px) {
-          font-size: initial;
-        }
+      @media only screen and (min-width: 768px) {
+        font-size: initial;
       }
+    }
 
-      .bid {
-        padding-left: 0;
-        padding-right: 0;
-        text-align: center;
-        min-width: 2vw;
-        max-width: 5vw;
+    .bid {
+      padding-left: 0;
+      padding-right: 0;
+      text-align: center;
+      min-width: 2vw;
+      max-width: 5vw;
+    }
+
+    h2 {
+      padding: 0;
+      margin: 0;
+      display: inline-block;
+      position: relative;
+    }
+
+    [data-player-score] {
+      position: relative;
+    }
+
+    [data-player-score]::before,
+    .dealer::after {
+      position: absolute;
+      bottom: 0;
+      color: $red;
+      font-family: $font-bold;
+      font-size: 2vw;
+      line-height: 170%;
+
+      @media only screen and (min-width: 768px) {
+        font-size: 1vw;
       }
+    }
+
+    [data-player-score]::before {
+      content: attr(data-player-score);
+      width: 20px;
+      left: -23px;
+      text-align: right;
+    }
+
+    .dealer::after {
+      content: "dealer";
+      padding-left: 22px;
+    }
+
+    .current_player {
+      padding: 0 20px;
+      background-color: black;
+      color: white;
+      font-style: italic;
+    }
+
+    .not_present {
+      opacity: 0.5;
+      font-style: italic;
+    }
+
+    .card {
+      display: flex;
+      flex-direction: row;
+      height: 100%;
+      justify-content: center;
+      align-items: center;
+      border: none;
 
       h2 {
-        padding: 0;
-        margin: 0;
-        display: inline-block;
-        position: relative;
+        margin: 0 0 0 5px;
+        font-size: 3vw;
       }
 
-      [data-player-score] {
-        position: relative;
-      }
-
-      [data-player-score]::before,
-      .dealer::after {
-        position: absolute;
-        bottom: 0;
-        color: $red;
-        font-family: $font-bold;
-        font-size: 2vw;
-        line-height: 170%;
-
-        @media only screen and (min-width: 768px) {
-          font-size: 1vw;
-        }
-      }
-
-      [data-player-score]::before {
-        content: attr(data-player-score);
-        width: 20px;
-        left: -23px;
-        text-align: right;
-      }
-
-      .dealer::after {
-        content: "dealer";
-        padding-left: 22px;
-      }
-
-      .current_player {
-        padding: 0 20px;
-        background-color: black;
-        color: white;
-        font-style: italic;
-      }
-
-      .not_present {
-        opacity: 0.5;
-        font-style: italic;
-      }
-
-      .card {
-        display: flex;
-        flex-direction: row;
-        height: 100%;
-        justify-content: center;
-        align-items: center;
-        border: none;
-
-        h2 {
-          margin: 0 0 0 5px;
-          font-size: 3vw;
-        }
-
-        img {
-          width: 3vw;
-          object-fit: contain;
-        }
+      img {
+        width: 3vw;
+        object-fit: contain;
       }
     }
   }
