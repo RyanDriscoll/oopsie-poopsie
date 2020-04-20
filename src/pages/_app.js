@@ -50,7 +50,8 @@ export default class MyApp extends App {
           h4,
           h5,
           h6,
-          p {
+          p,
+          label {
             color: ${dark ? DARK_TEXT : LIGHT_TEXT};
           }
 

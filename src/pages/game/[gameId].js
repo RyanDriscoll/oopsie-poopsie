@@ -716,7 +716,11 @@ class Game extends Component {
                       onChange={this.handleChange}
                     />
                   </FormGroup>
-                  <Button color="success" onClick={this.addPlayer}>
+                  <Button
+                    disabled={!playerName}
+                    color="success"
+                    onClick={this.addPlayer}
+                  >
                     JOIN
                   </Button>
                 </Form>
