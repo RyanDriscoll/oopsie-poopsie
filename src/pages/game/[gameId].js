@@ -20,7 +20,6 @@ import styles from "../../styles/pages/game.module.scss"
 import CardRow from "../../components/CardRow"
 import {
   getSource,
-  getColor,
   calculateLeader,
   getNextPlayer,
   isLegal,
@@ -654,6 +653,8 @@ class Game extends Component {
     const user = players[playerId]
     const userName = (user && user.name) || ""
 
+    const { dark } = this.context
+
     return (
       <>
         <div className={styles.game_page}>
@@ -687,7 +688,7 @@ class Game extends Component {
               {leadSuit && (
                 <>
                   <h3>LEAD</h3>
-                  <img src={getSource(leadSuit)} />
+                  <img src={getSource(leadSuit, dark)} />
                 </>
               )}
             </Col>
@@ -695,7 +696,7 @@ class Game extends Component {
               {trump && (
                 <>
                   <h3>TRUMP</h3>
-                  <img src={getSource(trump)} />
+                  <img src={getSource(trump, dark)} />
                 </>
               )}
             </Col>
@@ -749,8 +750,13 @@ class Game extends Component {
           }}
         >
           <ModalBody>
-            <Container>
-              {winner && <h2>{`${getWinner({ winner, players })} won!`}</h2>}
+            <Container className="text-align-center">
+              {winner && (
+                <h2 className="mb-3">{`${getWinner({
+                  winner,
+                  players
+                })} won!`}</h2>
+              )}
               <Button onClick={this.closeModal}>CLOSE</Button>
             </Container>
           </ModalBody>

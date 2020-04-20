@@ -1,4 +1,8 @@
 /* @styled-jsx=global */
+
+* {
+  transition: all 100ms ease-in-out;
+}
 body {
   font-family: $font-regular;
   font-size: 18px;
@@ -171,15 +175,10 @@ header {
   bottom: 0;
   left: 0;
   right: 0;
-  background-color: rgba($color: $white, $alpha: 0.3);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 10;
-
-  .spinner {
-    color: $red;
-  }
 }
 
 .spinner-anim-enter {
