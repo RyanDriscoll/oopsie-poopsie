@@ -6,18 +6,32 @@ import Modal from "reactstrap/lib/Modal"
 import ModalHeader from "reactstrap/lib/ModalHeader"
 import ModalBody from "reactstrap/lib/ModalBody"
 import CombinedContext from "../context/CombinedContext"
-import { Sound, Mute } from "../components/Icons"
+import { Sound, Mute, Sun, Moon } from "../components/Icons"
+import {
+  PINK,
+  RED,
+  DARK_BACKGROUND,
+  LIGHT_BACKGROUND,
+  DARK_TEXT,
+  LIGHT_TEXT
+} from "../utils/constants"
 
 const Header = () => {
   const [showRules, setShowRules] = useState(false)
   const toggleRules = () => {
     setShowRules(!showRules)
   }
-  const { mute, setState } = useContext(CombinedContext)
+  const { mute, dark, setState } = useContext(CombinedContext)
 
-  const handleClick = () => {
+  const handleSound = () => {
     setState(prevState => ({
       mute: !prevState.mute
+    }))
+  }
+
+  const handleDark = () => {
+    setState(prevState => ({
+      dark: !prevState.dark
     }))
   }
 
@@ -35,23 +49,41 @@ const Header = () => {
           </div>
 
           <div className={styles.rules}>
+            <div title={dark ? "Light mode" : "Dark mode"} onClick={handleDark}>
+              {dark ? (
+                <Sun className={styles.icon} />
+              ) : (
+                <Moon className={styles.icon} />
+              )}
+            </div>
             <div
               title={`Notification sounds ${mute ? "muted" : "active"}`}
-              onClick={handleClick}
+              onClick={handleSound}
             >
               {mute ? (
-                <Mute className={styles.sound} />
+                <Mute className={styles.icon} />
               ) : (
-                <Sound className={styles.sound} />
+                <Sound className={styles.icon} />
               )}
             </div>
             <button onClick={toggleRules}>
-              <h4>rules</h4>
+              <h4
+                style={{
+                  color: dark ? PINK : RED
+                }}
+              >
+                rules
+              </h4>
             </button>
           </div>
         </div>
       </header>
-      <Modal size="lg" isOpen={showRules} toggle={toggleRules}>
+      <Modal
+        size="lg"
+        isOpen={showRules}
+        toggle={toggleRules}
+        contentClassName="rules-modal"
+      >
         <ModalHeader>
           <h1>rules</h1>
         </ModalHeader>
@@ -160,6 +192,7 @@ const Header = () => {
           </a>
         </ModalBody>
       </Modal>
+      <style jsx>{``}</style>
     </>
   )
 }

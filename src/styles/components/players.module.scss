@@ -28,6 +28,7 @@ ul.players {
     input {
       font-size: 2vw;
       padding: 0 1.5vw;
+      border: none;
 
       @media only screen and (min-width: 768px) {
         font-size: initial;

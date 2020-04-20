@@ -6,18 +6,28 @@ import "../styles/main.scss"
 import { CombinedProvider } from "../context/CombinedContext"
 
 import Layout from "../components/Layout"
+import {
+  DARK_BACKGROUND,
+  LIGHT_BACKGROUND,
+  DARK_TEXT,
+  LIGHT_TEXT,
+  PINK,
+  RED
+} from "../utils/constants"
 
 export default class MyApp extends App {
   constructor(props) {
     super(props)
     this.state = {
       setState: this.setState.bind(this),
-      mute: true
+      mute: true,
+      dark: true
     }
   }
 
   render() {
     const { Component, pageProps } = this.props
+    const { dark } = this.state
 
     return (
       <CombinedProvider value={this.state}>
@@ -28,6 +38,33 @@ export default class MyApp extends App {
         <Layout>
           <Component {...pageProps} />
         </Layout>
+        <style global jsx>{`
+          body {
+            background-color: ${dark
+              ? DARK_BACKGROUND
+              : LIGHT_BACKGROUND} !important;
+          }
+          h1,
+          h2,
+          h3,
+          h4,
+          h5,
+          h6,
+          p {
+            color: ${dark ? DARK_TEXT : LIGHT_TEXT};
+          }
+
+          .modal-content {
+            background-color: ${dark
+              ? DARK_BACKGROUND
+              : LIGHT_BACKGROUND} !important;
+            color: ${dark ? DARK_TEXT : LIGHT_TEXT} !important;
+          }
+
+          .modal-content a {
+            color: ${dark ? PINK : RED} !important;
+          }
+        `}</style>
       </CombinedProvider>
     )
   }

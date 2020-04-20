@@ -25,9 +25,9 @@
     display: flex;
     cursor: pointer;
 
-    .sound {
+    .icon {
       width: 3vw;
-      margin-right: 1vw;
+      margin-right: 2vw;
     }
 
     button {
@@ -39,7 +39,6 @@
       padding: 4px;
       margin: 0;
       background-color: $black;
-      color: $red;
       font-style: italic;
       font-family: $font-bold;
       cursor: pointer;

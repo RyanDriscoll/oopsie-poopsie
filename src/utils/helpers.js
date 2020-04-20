@@ -1,3 +1,5 @@
+import { BLUE, PINK } from "./constants"
+
 export const absoluteUrl = (req, setLocalhost) => {
   let protocol = "https:"
   let host = req
@@ -14,18 +16,24 @@ export const absoluteUrl = (req, setLocalhost) => {
   }
 }
 
-export const getColor = suit =>
-  suit === "C" || suit === "S" ? "#000" : "#db0007"
-export const getSource = suit => {
+export const getColor = (suit, dark) => {
+  if (suit === "C" || suit === "S") {
+    return dark ? BLUE : "#000"
+  } else {
+    return dark ? PINK : "#db0007"
+  }
+}
+
+export const getSource = (suit, dark) => {
   switch (suit) {
     case "C":
-      return "/images/club.png"
+      return `/images/club${dark ? "-dark" : ""}.png`
     case "H":
-      return "/images/heart.png"
+      return `/images/heart${dark ? "-dark" : ""}.png`
     case "S":
-      return "/images/spade.png"
+      return `/images/spade${dark ? "-dark" : ""}.png`
     case "D":
-      return "/images/diamond.png"
+      return `/images/diamond${dark ? "-dark" : ""}.png`
   }
 }
 
