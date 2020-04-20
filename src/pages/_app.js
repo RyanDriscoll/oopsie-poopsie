@@ -25,6 +25,30 @@ export default class MyApp extends App {
     }
   }
 
+  componentDidMount() {
+    if (window && window.matchMedia) {
+      this.setState({
+        dark: this.prefersDark()
+      })
+      window
+        .matchMedia("(prefers-color-scheme: dark)")
+        .addEventListener("change", () => {
+          this.setState({
+            dark: this.prefersDark()
+          })
+        })
+    }
+  }
+
+  prefersDark = () => {
+    if (window.matchMedia) {
+      if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        return true
+      }
+    }
+    return false
+  }
+
   render() {
     const { Component, pageProps } = this.props
     const { dark } = this.state
