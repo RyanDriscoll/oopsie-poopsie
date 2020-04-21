@@ -79,6 +79,7 @@ const Header = () => {
         </div>
       </header>
       <Modal
+        centered
         size="lg"
         isOpen={showRules}
         toggle={toggleRules}
