@@ -10,18 +10,7 @@ ul.players {
     margin-bottom: 10vw;
 
     @media only screen and (min-width: 768px) {
-      margin-bottom: 3vw;
-      &.current_player_arrow {
-        &::before {
-          position: absolute;
-          content: "-->";
-          left: -6vw;
-          bottom: 0;
-          color: $red;
-          font-family: $font-bold;
-          font-size: 2vw;
-        }
-      }
+      margin-bottom: 2vw;
     }
 
     button,
@@ -33,14 +22,6 @@ ul.players {
       @media only screen and (min-width: 768px) {
         font-size: initial;
       }
-    }
-
-    .bid {
-      padding-left: 0;
-      padding-right: 0;
-      text-align: center;
-      min-width: 2vw;
-      max-width: 5vw;
     }
 
     h2 {
@@ -110,5 +91,49 @@ ul.players {
         object-fit: contain;
       }
     }
+
+    .player_row {
+      min-height: 5vw;
+
+      @media only screen and (min-width: 768px) {
+        &.current_player_arrow {
+          &::before {
+            position: absolute;
+            content: "-->";
+            left: -6vw;
+            top: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            color: $red;
+            font-family: $font-bold;
+            font-size: 2vw;
+          }
+        }
+      }
+    }
   }
+}
+
+form {
+  .toggle_results {
+    padding-left: 0;
+    padding-right: 0;
+    text-align: center;
+    width: 100px;
+    background-color: transparent !important;
+    border: none;
+    font-size: 3rem;
+  }
+
+  .toggle_button {
+    width: 60px;
+    height: 60px;
+    font-size: 2rem;
+  }
+}
+.bid_button {
+  height: 60px;
+  font-size: 2rem;
+  width: 100px;
 }
