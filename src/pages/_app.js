@@ -12,7 +12,8 @@ import {
   DARK_TEXT,
   LIGHT_TEXT,
   PINK,
-  RED
+  RED,
+  BLACK
 } from "../utils/constants"
 
 export default class MyApp extends App {
@@ -21,22 +22,27 @@ export default class MyApp extends App {
     this.state = {
       setState: this.setState.bind(this),
       mute: true,
-      dark: true
+      dark: true,
+      mounted: false
     }
   }
 
   componentDidMount() {
     if (window && window.matchMedia) {
-      this.setState({
-        dark: this.prefersDark()
-      })
-      window
-        .matchMedia("(prefers-color-scheme: dark)")
-        .addEventListener("change", () => {
-          this.setState({
-            dark: this.prefersDark()
-          })
-        })
+      this.setState(
+        {
+          dark: this.prefersDark()
+        },
+        () => {
+          window
+            .matchMedia("(prefers-color-scheme: dark)")
+            .addEventListener("change", () => {
+              this.setState({
+                dark: this.prefersDark()
+              })
+            })
+        }
+      )
     }
   }
 
@@ -75,8 +81,14 @@ export default class MyApp extends App {
           h5,
           h6,
           p,
-          label {
+          label,
+          .main-text {
             color: ${dark ? DARK_TEXT : LIGHT_TEXT};
+          }
+
+          .playing-card {
+            background-color: ${dark ? BLACK : LIGHT_BACKGROUND} !important;
+            border-color: ${dark ? DARK_BACKGROUND : BLACK} !important;
           }
 
           .modal-content {
@@ -86,7 +98,11 @@ export default class MyApp extends App {
             color: ${dark ? DARK_TEXT : LIGHT_TEXT} !important;
           }
 
-          .modal-content a {
+          a,
+          .red-text,
+          .player-row::before,
+          .player-score::before,
+          .player-name::after {
             color: ${dark ? PINK : RED} !important;
           }
         `}</style>
