@@ -3,7 +3,6 @@ import React, { useContext } from "react"
 import styles from "../styles/components/card-row.module.scss"
 import { getSource, getColor } from "../utils/helpers"
 import CombinedContext from "../context/CombinedContext"
-import { DARK_BACKGROUND } from "../utils/constants"
 const CardRow = ({ cards, playCard }) => {
   const { dark } = useContext(CombinedContext)
   return (
@@ -11,14 +10,7 @@ const CardRow = ({ cards, playCard }) => {
       {cards &&
         cards.map(card => (
           <li
-            style={
-              dark
-                ? {
-                    backgroundColor: "#000",
-                    borderColor: DARK_BACKGROUND
-                  }
-                : {}
-            }
+            className="playing-card"
             key={card.cardId}
             onClick={e => {
               e.preventDefault()
