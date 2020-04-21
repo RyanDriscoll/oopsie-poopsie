@@ -73,9 +73,7 @@ const Header = () => {
         toggle={toggleRules}
         contentClassName="rules-modal"
       >
-        <ModalHeader toggle={toggleRules}>
-          <h1>rules</h1>
-        </ModalHeader>
+        <ModalHeader toggle={toggleRules}>rules</ModalHeader>
         <ModalBody>
           <h2>Game Objective</h2>
           <p>The aim of the game is to score more points than your opponent.</p>
