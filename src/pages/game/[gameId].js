@@ -42,6 +42,7 @@ import {
   addPlayer,
   nextRound
 } from "../../utils/api"
+import CustomTrump from "../../components/CustomTrump"
 
 class Game extends Component {
   constructor(props) {
@@ -735,7 +736,7 @@ class Game extends Component {
             <Col xs="2" className={styles.lead_trump_container}>
               {trump && (
                 <>
-                  <h3>TRUMP</h3>
+                  <CustomTrump />
                   <img src={getSource(trump, dark)} />
                 </>
               )}
