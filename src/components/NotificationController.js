@@ -66,7 +66,8 @@ class NotificationController extends React.Component {
           title={"oopsie poopsie..."}
           options={{
             body: `your turn, ${this.props.userName}`,
-            icon: "/images/poop.png"
+            icon: "/images/poop.png",
+            tag: "your-turn"
           }}
         />
         <audio
