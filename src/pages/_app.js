@@ -87,7 +87,7 @@ export default class MyApp extends App {
           }
 
           .playing-card {
-            background-color: ${dark ? BLACK : LIGHT_BACKGROUND} !important;
+            background-color: ${dark ? BLACK : "#FFF"} !important;
             border-color: ${dark ? DARK_BACKGROUND : BLACK} !important;
           }
 
