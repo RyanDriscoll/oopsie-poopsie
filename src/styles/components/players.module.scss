@@ -5,6 +5,10 @@ ul.players {
   padding: 0;
   margin-bottom: 175px;
 
+  * {
+    transition: all 100ms ease-in-out;
+  }
+
   li {
     position: relative;
     margin-bottom: 10vw;
