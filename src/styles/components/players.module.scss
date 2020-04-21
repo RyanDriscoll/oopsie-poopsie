@@ -43,10 +43,8 @@ ul.players {
     .dealer::after {
       position: absolute;
       bottom: 0;
-      color: $red;
       font-family: $font-bold;
       font-size: 2vw;
-      line-height: 170%;
 
       @media only screen and (min-width: 768px) {
         font-size: 1vw;
@@ -62,7 +60,8 @@ ul.players {
 
     .dealer::after {
       content: "dealer";
-      padding-left: 22px;
+      bottom: -50%;
+      right: 0;
     }
 
     .current_player {
