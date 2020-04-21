@@ -62,7 +62,8 @@ class Game extends Component {
       roundScore: {},
       showScore: false,
       showYourTurn: false,
-      trump: null
+      trump: null,
+      queuedCard: null
     }
 
     this.gameRef
@@ -71,6 +72,7 @@ class Game extends Component {
     this.bidRef
     this.trickRef
     this.trumpRef
+    this.autoPlayTimeout
   }
 
   async componentDidMount() {
@@ -182,6 +184,7 @@ class Game extends Component {
         this.gameRef.on("child_added", data => {
           let value = data.val()
           const key = data.key
+          console.log(`$$>>>>: Game -> listenToGame -> key`, key, value)
           if (key === "roundId") {
             this.listenToRound(value)
             this.listenToHand({ playerId, roundId: value })
@@ -190,7 +193,7 @@ class Game extends Component {
             game: { ...prevState.game, [key]: value }
           }))
           if (key === "currentPlayer" && value === playerId) {
-            this.setState({ showYourTurn: true })
+            this.yourTurn()
           }
         }),
         this.gameRef.on("child_changed", data => {
@@ -207,7 +210,7 @@ class Game extends Component {
                 }
           )
           if (key === "currentPlayer" && value === playerId) {
-            this.setState({ showYourTurn: true })
+            this.yourTurn()
           }
         }),
         this.gameRef.on("child_removed", data => {
@@ -401,6 +404,18 @@ class Game extends Component {
     }
   }
 
+  yourTurn = async () => {
+    const { queuedCard } = this.state
+    if (queuedCard) {
+      this.autoPlayTimeout = setTimeout(async () => {
+        await this.playCard(queuedCard)
+        this.setState({ queuedCard: null })
+      }, 700)
+    } else {
+      this.setState({ showYourTurn: true })
+    }
+  }
+
   addPlayer = async () => {
     try {
       this.setState({ loading: true })
@@ -438,6 +453,9 @@ class Game extends Component {
 
   playCard = async card => {
     try {
+      if (this.autoPlayTimeout) {
+        clearTimeout(this.autoPlayTimeout)
+      }
       this.setState({ loading: true })
       const {
         game,
@@ -493,13 +511,31 @@ class Game extends Component {
         if (nextRound) {
           await this.nextRound()
         }
+      } else if (
+        game &&
+        game.status === "play" &&
+        game.currentPlayer &&
+        game.currentPlayer !== playerId &&
+        isLegal({ hand, card, leadSuit })
+      ) {
+        this.setState(prevState => {
+          let newCard = card
+          if (
+            prevState.queuedCard &&
+            prevState.queuedCard.cardId === card.cardId
+          ) {
+            newCard = null
+          }
+          return {
+            queuedCard: newCard
+          }
+        })
       }
       this.setState({ loading: false })
     } catch (error) {
       this.setState({ loading: false })
       console.error(`$$>>>>: Game -> error`, error)
     }
-    const { game, playerId } = this.state
   }
 
   nextRound = async () => {
@@ -624,7 +660,8 @@ class Game extends Component {
       winner,
       showScore,
       showYourTurn,
-      trump
+      trump,
+      queuedCard
     } = this.state
     let name,
       status,
@@ -744,10 +781,15 @@ class Game extends Component {
             afterBid={() => this.setState({ bid: 0 })}
             thisPlayer={playerId}
             gameScore={gameScore}
+            winnerModalShowing={Boolean(winner)}
             status={status}
           />
         </div>
-        <CardRow cards={hand} playCard={this.playCard} />
+        <CardRow
+          cards={hand}
+          playCard={this.playCard}
+          queuedCard={queuedCard}
+        />
         <Modal
           centered
           isOpen={Boolean(winner)}
@@ -755,7 +797,7 @@ class Game extends Component {
           onOpened={() => {
             setTimeout(() => {
               this.closeModal()
-            }, 2000)
+            }, 1000)
           }}
         >
           <ModalBody>

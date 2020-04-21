@@ -3,14 +3,18 @@ import React, { useContext } from "react"
 import styles from "../styles/components/card-row.module.scss"
 import { getSource, getColor } from "../utils/helpers"
 import CombinedContext from "../context/CombinedContext"
-const CardRow = ({ cards, playCard }) => {
+import classNames from "classnames"
+const CardRow = ({ cards, playCard, queuedCard }) => {
   const { dark } = useContext(CombinedContext)
   return (
     <ul className={styles.card_row}>
       {cards &&
         cards.map(card => (
           <li
-            className="playing-card"
+            className={classNames({
+              "playing-card": true,
+              [styles.selected]: queuedCard && queuedCard.cardId === card.cardId
+            })}
             key={card.cardId}
             onClick={e => {
               e.preventDefault()

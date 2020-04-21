@@ -28,6 +28,7 @@ const Players = ({
   dealer,
   thisPlayer,
   gameScore,
+  winnerModalShowing,
   status
 }) => {
   const { dark } = useContext(CombinedContext)
@@ -113,6 +114,7 @@ const Players = ({
                 centered
                 isOpen={
                   status === "bid" &&
+                  !winnerModalShowing &&
                   thisPlayer === playerId &&
                   currentPlayer === playerId
                 }
