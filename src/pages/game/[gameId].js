@@ -185,7 +185,6 @@ class Game extends Component {
         this.gameRef.on("child_added", data => {
           let value = data.val()
           const key = data.key
-          console.log(`$$>>>>: Game -> listenToGame -> key`, key, value)
           if (key === "roundId") {
             this.listenToRound(value)
             this.listenToHand({ playerId, roundId: value })
