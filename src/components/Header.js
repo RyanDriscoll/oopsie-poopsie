@@ -30,44 +30,40 @@ const Header = () => {
   return (
     <>
       <header id={styles.header}>
-        <div className={styles.navigation_wrapper}>
-          <Link href="/">
-            <a className={styles.img_container}>
-              <img
-                src="/images/poop.png"
-                alt="Oh Shit Logo"
-                className={classNames({
-                  [styles.huge]: !mounted
-                })}
-              />
-            </a>
-          </Link>
-          <div className={styles.title}>
-            <h1>oopsie poopsie...</h1>
-          </div>
+        <Link href="/">
+          <a className={styles.img_container}>
+            <img
+              src="/images/poop.png"
+              alt="Oh Shit Logo"
+              className={classNames({
+                [styles.huge]: !mounted
+              })}
+            />
+          </a>
+        </Link>
+        <h1>oopsie poopsie...</h1>
 
-          <div className={styles.rules}>
-            <div title={dark ? "Light mode" : "Dark mode"} onClick={handleDark}>
-              {dark ? (
-                <Sun className={styles.icon} />
-              ) : (
-                <Moon className={styles.icon} />
-              )}
-            </div>
-            <div
-              title={`Notification sounds ${mute ? "muted" : "active"}`}
-              onClick={handleSound}
-            >
-              {mute ? (
-                <Mute className={styles.icon} />
-              ) : (
-                <Sound className={styles.icon} />
-              )}
-            </div>
-            <button onClick={toggleRules}>
-              <h4 className="red-text">rules</h4>
-            </button>
+        <div className={styles.rules}>
+          <div title={dark ? "Light mode" : "Dark mode"} onClick={handleDark}>
+            {dark ? (
+              <Sun className={styles.icon} />
+            ) : (
+              <Moon className={styles.icon} />
+            )}
           </div>
+          <div
+            title={`Notification sounds ${mute ? "muted" : "active"}`}
+            onClick={handleSound}
+          >
+            {mute ? (
+              <Mute className={styles.icon} />
+            ) : (
+              <Sound className={styles.icon} />
+            )}
+          </div>
+          <button onClick={toggleRules}>
+            <h4 className="red-text">rules</h4>
+          </button>
         </div>
       </header>
       <Modal

@@ -3,57 +3,48 @@
 #header {
   position: relative;
   z-index: 3;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  position: relative;
 
-  .navigation_wrapper {
+  .img_container {
+    max-width: 7vw;
+
+    img {
+      transition: transform 1s ease-in-out;
+      &.huge {
+        transform: translateX(630%) scale(55);
+      }
+    }
+  }
+
+  h1 {
+    margin: 2vw;
+  }
+
+  .rules {
+    margin-left: auto;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: relative;
+    cursor: pointer;
 
-    .img_container {
-      max-width: 7vw;
-
-      img {
-        transition: transform 1s ease-in-out;
-        &.huge {
-          transform: translateX(630%) scale(55);
-        }
-      }
+    .icon {
+      width: 3vw;
+      margin-right: 2vw;
     }
 
-    .title {
-      h1 {
-        margin: 10px;
-        text-align: center;
-      }
+    button {
+      border: none;
+      margin: 0;
     }
 
-    .space {
-      width: 60px;
-    }
-
-    .rules {
-      display: flex;
+    h4 {
+      padding: 4px;
+      margin: 0;
+      background-color: $black;
+      font-style: italic;
+      font-family: $font-bold;
       cursor: pointer;
-
-      .icon {
-        width: 3vw;
-        margin-right: 2vw;
-      }
-
-      button {
-        border: none;
-        margin: 0;
-      }
-
-      h4 {
-        padding: 4px;
-        margin: 0;
-        background-color: $black;
-        font-style: italic;
-        font-family: $font-bold;
-        cursor: pointer;
-      }
     }
   }
 }
