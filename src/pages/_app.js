@@ -13,7 +13,8 @@ import {
   LIGHT_TEXT,
   PINK,
   RED,
-  BLACK
+  BLACK,
+  WHITE
 } from "../utils/constants"
 
 export default class MyApp extends App {
@@ -104,6 +105,13 @@ export default class MyApp extends App {
           .player-score::before,
           .player-name::after {
             color: ${dark ? PINK : RED} !important;
+          }
+
+          .close {
+            color: ${dark ? DARK_TEXT : LIGHT_TEXT};
+          }
+          .close:hover {
+            color: ${dark ? WHITE : BLACK};
           }
         `}</style>
       </CombinedProvider>

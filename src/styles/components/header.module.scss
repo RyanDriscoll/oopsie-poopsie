@@ -9,7 +9,7 @@
   position: relative;
 
   .img_container {
-    max-width: 7vw;
+    max-width: 4vw;
 
     img {
       transition: transform 1s ease-in-out;
@@ -20,7 +20,8 @@
   }
 
   h1 {
-    margin: 2vw;
+    margin: 10px 2vw;
+    font-size: 2.5rem;
   }
 
   .rules {
@@ -29,8 +30,8 @@
     cursor: pointer;
 
     .icon {
-      width: 3vw;
-      margin-right: 2vw;
+      width: 2vw;
+      margin-right: 1vw;
     }
 
     button {
