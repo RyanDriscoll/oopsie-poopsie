@@ -66,14 +66,20 @@
       }
     }
 
-    &:hover,
-    &.selected {
-      position: relative;
-      bottom: 5vw;
+    @media (hover: hover) and (pointer: fine) {
+      &:hover {
+        position: relative;
+        bottom: 4vw;
+      }
     }
 
     &.selected {
+      position: relative;
       bottom: 10vw;
+
+      @media only screen and (min-width: 768px) {
+        bottom: 7vw;
+      }
     }
   }
 }

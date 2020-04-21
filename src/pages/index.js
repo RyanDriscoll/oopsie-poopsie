@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react"
+import React, { useState, useRef, useContext, useEffect } from "react"
 import Link from "next/link"
 import Container from "reactstrap/lib/Container"
 import Button from "reactstrap/lib/Button"
@@ -15,6 +15,7 @@ import { newGame } from "../utils/api"
 import styles from "../styles/pages/home.module.scss"
 import { CopyIcon } from "../components/Icons"
 import Col from "reactstrap/lib/Col"
+import CombinedContext from "../context/CombinedContext"
 
 const CreateGame = ({ origin }) => {
   const [name, setName] = useState("")
@@ -27,6 +28,15 @@ const CreateGame = ({ origin }) => {
   const [numCards, setNumCards] = useState(5)
 
   const gameUrlRef = useRef(null)
+
+  const { setState } = useContext(CombinedContext)
+
+  useEffect(() => {
+    setState({ mounted: true })
+    return () => {
+      setState({ mounted: false })
+    }
+  }, [])
 
   const handleChange = e => {
     const { name, value } = e.target
