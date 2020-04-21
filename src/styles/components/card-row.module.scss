@@ -16,10 +16,10 @@
 
   li {
     display: inline-block;
-    border: 1px solid black;
+    border-width: 1px;
     border-radius: 5px;
     margin-left: -2px;
-    background-color: white;
+    border-style: solid;
     width: 10vw;
     height: calc(10vw * 1.5);
     cursor: pointer;
@@ -27,7 +27,7 @@
     transition: all 100ms ease-in-out;
 
     @media only screen and (min-width: 768px) {
-      border: 2px solid black;
+      border-width: 2px;
       border-radius: 10px;
       margin-left: -20px;
       width: 11vw;

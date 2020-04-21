@@ -1,47 +1,59 @@
 @import "../global/variables.scss";
 
-.navigation_wrapper {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+#header {
   position: relative;
+  z-index: 3;
 
-  .img_container {
-    max-width: 7vw;
-  }
-
-  .title {
-    h1 {
-      margin: 10px;
-      text-align: center;
-    }
-  }
-
-  .space {
-    width: 60px;
-  }
-
-  .rules {
+  .navigation_wrapper {
     display: flex;
-    cursor: pointer;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
 
-    .icon {
-      width: 3vw;
-      margin-right: 2vw;
+    .img_container {
+      max-width: 7vw;
+
+      img {
+        transition: transform 1s ease-in-out;
+        &.huge {
+          transform: translateX(630%) scale(55);
+        }
+      }
     }
 
-    button {
-      border: none;
-      margin: 0;
+    .title {
+      h1 {
+        margin: 10px;
+        text-align: center;
+      }
     }
 
-    h4 {
-      padding: 4px;
-      margin: 0;
-      background-color: $black;
-      font-style: italic;
-      font-family: $font-bold;
+    .space {
+      width: 60px;
+    }
+
+    .rules {
+      display: flex;
       cursor: pointer;
+
+      .icon {
+        width: 3vw;
+        margin-right: 2vw;
+      }
+
+      button {
+        border: none;
+        margin: 0;
+      }
+
+      h4 {
+        padding: 4px;
+        margin: 0;
+        background-color: $black;
+        font-style: italic;
+        font-family: $font-bold;
+        cursor: pointer;
+      }
     }
   }
 }

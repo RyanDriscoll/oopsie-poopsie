@@ -7,10 +7,14 @@ import InputGroup from "reactstrap/lib/InputGroup"
 import Input from "reactstrap/lib/Input"
 import InputGroupAddon from "reactstrap/lib/InputGroupAddon"
 import Button from "reactstrap/lib/Button"
-import * as classNames from "classnames"
+import classNames from "classnames"
 import styles from "../styles/components/players.module.scss"
 import CombinedContext from "../context/CombinedContext"
-import { PINK, RED } from "../utils/constants"
+import Modal from "reactstrap/lib/Modal"
+import ModalBody from "reactstrap/lib/ModalBody"
+import ModalHeader from "reactstrap/lib/ModalHeader"
+import ModalFooter from "reactstrap/lib/ModalFooter"
+import { Container } from "next/app"
 const Players = ({
   players,
   currentPlayer,
@@ -20,6 +24,7 @@ const Players = ({
   bid,
   handleToggle,
   submitBid,
+  afterBid,
   dealer,
   thisPlayer,
   gameScore,
@@ -44,138 +49,138 @@ const Players = ({
   }
 
   return (
-    <>
-      <ul className={styles.players}>
-        {newPlayers &&
-          newPlayers.map(({ playerId, present, name }) => {
-            const isCurrent = currentPlayer === playerId
-            const isDealer = dealer === playerId
-            let playerScore =
-              gameScore && gameScore[playerId] ? gameScore[playerId] : "0"
-            if (!status || status === "pending") {
-              playerScore = ""
-            }
-            return (
-              <li
-                key={playerId}
+    <ul className={styles.players}>
+      {newPlayers &&
+        newPlayers.map(({ playerId, present, name }) => {
+          const isCurrent = currentPlayer === playerId
+          const isDealer = dealer === playerId
+          let playerScore =
+            gameScore && gameScore[playerId] ? gameScore[playerId] : "0"
+          if (!status || status === "pending") {
+            playerScore = ""
+          }
+          return (
+            <li key={playerId} className={classNames({})}>
+              <Row
                 className={classNames({
                   [styles.current_player_arrow]: isCurrent,
-                  current: true
+                  [styles.player_row]: true,
+                  "player-row": true
                 })}
               >
-                <Row className={classNames(styles.player_row, "player-row")}>
-                  <Col xs="4">
-                    <div
-                      className="player-score"
-                      data-player-score={playerScore}
+                <Col xs="4" className="d-flex align-items-center">
+                  <div className="player-score" data-player-score={playerScore}>
+                    <h2
+                      className={classNames({
+                        [styles.current_player]: isCurrent,
+                        [styles.not_present]: !present,
+                        [styles.dealer]: isDealer,
+                        "player-name": true
+                      })}
                     >
+                      {name}
+                    </h2>
+                  </div>
+                </Col>
+                {bids && bids[playerId] != null && (
+                  <Col xs="3" sm="4" className="d-flex align-items-center">
+                    <Row>
+                      <Col xs="12" sm="6">
+                        <h3>{`Bid: ${bids[playerId]}`}</h3>
+                      </Col>
+                      <Col xs="12" sm="6">
+                        <h3>{`Won: ${roundScore[playerId] || "0"}`}</h3>
+                      </Col>
+                    </Row>
+                  </Col>
+                )}
+                {trick && trick.cards && trick.cards[playerId] && (
+                  <Col xs="5" sm="4">
+                    <div className={styles.card}>
+                      <img src={getSource(trick.cards[playerId].suit, dark)} />
                       <h2
-                        className={classNames({
-                          [styles.current_player]: isCurrent,
-                          [styles.not_present]: !present,
-                          [styles.dealer]: isDealer,
-                          "player-name": true
-                        })}
+                        style={{
+                          color: getColor(trick.cards[playerId].suit, dark)
+                        }}
                       >
-                        {name}
+                        {trick.cards[playerId].value}
                       </h2>
                     </div>
                   </Col>
-                  {bids && bids[playerId] != null ? (
-                    <>
-                      <Col
-                        xs="3"
-                        sm="4"
-                        className="d-flex justify-content-between align-items-center"
-                      >
-                        <Row>
-                          <Col xs="12" sm="6">
-                            <h3>{`Bid: ${bids[playerId]}`}</h3>
-                          </Col>
-                          <Col xs="12" sm="6">
-                            <h3>{`Won: ${roundScore[playerId] || "0"}`}</h3>
-                          </Col>
-                        </Row>
-                      </Col>
-                      <Col xs="5" sm="4">
-                        {trick && trick.cards && trick.cards[playerId] && (
-                          <div className={styles.card}>
-                            <img
-                              src={getSource(trick.cards[playerId].suit, dark)}
-                            />
-                            <h2
-                              style={{
-                                color: getColor(
-                                  trick.cards[playerId].suit,
-                                  dark
-                                )
-                              }}
-                            >
-                              {trick.cards[playerId].value}
-                            </h2>
-                          </div>
-                        )}
-                      </Col>
-                    </>
-                  ) : (
-                    <Col xs="7" sm="4">
-                      {thisPlayer === playerId && currentPlayer === playerId && (
-                        <Form>
-                          <InputGroup className={styles.bid_container}>
-                            <InputGroupAddon addonType="prepend">
-                              <Button
-                                color="danger"
-                                onClick={e =>
-                                  handleToggle(false, e.target.value)
-                                }
-                              >
-                                -
-                              </Button>
-                            </InputGroupAddon>
-                            <Input
-                              data-lpignore="true"
-                              type="text"
-                              value={bid}
-                              name="bid"
-                              id="bid"
-                              className={styles.bid}
-                              readOnly
-                            />
-                            <InputGroupAddon addonType="append">
-                              <Button
-                                color="success"
-                                onClick={e =>
-                                  handleToggle(true, e.target.value)
-                                }
-                              >
-                                +
-                              </Button>
-                            </InputGroupAddon>
+                )}
+              </Row>
+              <Modal
+                centered
+                isOpen={
+                  status === "bid" &&
+                  thisPlayer === playerId &&
+                  currentPlayer === playerId
+                }
+                onClosed={afterBid}
+              >
+                <ModalBody>
+                  <Container>
+                    <Row className="justify-content-center">
+                      <h1>Bid</h1>
+                    </Row>
+                    <Row className="justify-content-center">
+                      <Form>
+                        <InputGroup>
+                          <InputGroupAddon
+                            className="align-items-center"
+                            addonType="prepend"
+                          >
                             <Button
-                              color="primary"
-                              onClick={submitBid}
-                              style={{ marginLeft: 10 }}
+                              className={styles.toggle_button}
+                              color="danger"
+                              onClick={e => handleToggle(false, e.target.value)}
                             >
-                              BID
+                              -
                             </Button>
-                          </InputGroup>
-                        </Form>
-                      )}
-                    </Col>
-                  )}
-                </Row>
-              </li>
-            )
-          })}
-      </ul>
-      <style jsx>{`
-        .current::before,
-        .player-score::before,
-        .player-name::after {
-          color: ${dark ? PINK : RED} !important;
-        }
-      `}</style>
-    </>
+                          </InputGroupAddon>
+                          <Input
+                            data-lpignore="true"
+                            type="text"
+                            value={bid}
+                            name="bid"
+                            id="bid"
+                            className={classNames(
+                              styles.toggle_results,
+                              "main-text"
+                            )}
+                            readOnly
+                          />
+                          <InputGroupAddon
+                            className="align-items-center"
+                            addonType="append"
+                          >
+                            <Button
+                              className={styles.toggle_button}
+                              color="success"
+                              onClick={e => handleToggle(true, e.target.value)}
+                            >
+                              +
+                            </Button>
+                          </InputGroupAddon>
+                        </InputGroup>
+                      </Form>
+                    </Row>
+                    <Row className="justify-content-center mt-5">
+                      <Button
+                        className={styles.bid_button}
+                        color="primary"
+                        onClick={submitBid}
+                      >
+                        BID
+                      </Button>
+                    </Row>
+                  </Container>
+                </ModalBody>
+              </Modal>
+            </li>
+          )
+        })}
+    </ul>
   )
 }
 

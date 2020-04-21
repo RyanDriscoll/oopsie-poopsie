@@ -1,27 +1,19 @@
 import React, { useState, useContext } from "react"
 import Link from "next/link"
-import styles from "../styles/components/header.module.scss"
-import Button from "reactstrap/lib/Button"
+import classNames from "classnames"
 import Modal from "reactstrap/lib/Modal"
 import ModalHeader from "reactstrap/lib/ModalHeader"
 import ModalBody from "reactstrap/lib/ModalBody"
 import CombinedContext from "../context/CombinedContext"
+import styles from "../styles/components/header.module.scss"
 import { Sound, Mute, Sun, Moon } from "../components/Icons"
-import {
-  PINK,
-  RED,
-  DARK_BACKGROUND,
-  LIGHT_BACKGROUND,
-  DARK_TEXT,
-  LIGHT_TEXT
-} from "../utils/constants"
 
 const Header = () => {
   const [showRules, setShowRules] = useState(false)
   const toggleRules = () => {
     setShowRules(!showRules)
   }
-  const { mute, dark, setState } = useContext(CombinedContext)
+  const { mute, dark, mounted, setState } = useContext(CombinedContext)
 
   const handleSound = () => {
     setState(prevState => ({
@@ -37,11 +29,17 @@ const Header = () => {
 
   return (
     <>
-      <header>
+      <header id={styles.header}>
         <div className={styles.navigation_wrapper}>
           <Link href="/">
             <a className={styles.img_container}>
-              <img src="/images/poop.png" alt="Oh Shit Logo" />
+              <img
+                src="/images/poop.png"
+                alt="Oh Shit Logo"
+                className={classNames({
+                  [styles.huge]: !mounted
+                })}
+              />
             </a>
           </Link>
           <div className={styles.title}>
@@ -67,18 +65,13 @@ const Header = () => {
               )}
             </div>
             <button onClick={toggleRules}>
-              <h4
-                style={{
-                  color: dark ? PINK : RED
-                }}
-              >
-                rules
-              </h4>
+              <h4 className="red-text">rules</h4>
             </button>
           </div>
         </div>
       </header>
       <Modal
+        centered
         size="lg"
         isOpen={showRules}
         toggle={toggleRules}
