@@ -516,7 +516,8 @@ class Game extends Component {
         game.status === "play" &&
         game.currentPlayer &&
         game.currentPlayer !== playerId &&
-        isLegal({ hand, card, leadSuit })
+        isLegal({ hand, card, leadSuit }) &&
+        (!trick || !trick.cards || !trick.cards[playerId])
       ) {
         this.setState(prevState => {
           let newCard = card
