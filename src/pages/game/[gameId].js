@@ -79,11 +79,14 @@ class Game extends Component {
       const { game } = this.state
       const playerId = localStorage.getItem(`oh-shit-game-${gameId}-player-id`)
       this.setState({ playerId })
-      this.listenToPlayers(gameId, playerId)
+      await this.listenToPlayers(gameId, playerId)
       if (playerId) {
-        this.listenToGame({ gameId, playerId })
-        await updatePlayer({ playerId, gameId, present: true })
+        await Promise.all([
+          updatePlayer({ playerId, gameId, present: true }),
+          this.listenToGame({ gameId, playerId })
+        ])
       }
+      this.context.setState({ mounted: true })
     } catch (error) {
       console.error(`$$>>>>: Game -> componentDidMount -> error`, error)
     }
@@ -545,7 +548,7 @@ class Game extends Component {
       const { gameId } = this.props
       const { bid, playerId, game, bids, players } = this.state
       const { numPlayers, roundId } = game
-      const allBidsIn = (Object.keys(bids || {}).length = numPlayers)
+      const allBidsIn = Object.keys(bids || {}).length === numPlayers - 1
       const nextPlayerId = players[playerId].nextPlayer
       const body = {
         gameId,
@@ -557,7 +560,7 @@ class Game extends Component {
       }
 
       await submitBid(body)
-      this.setState({ bid: 0, loading: false })
+      this.setState({ loading: false })
     } catch (error) {
       this.setState({ loading: false })
       console.error(`$$>>>>: Game -> error`, error)
@@ -738,6 +741,7 @@ class Game extends Component {
             dealer={dealer}
             handleToggle={this.handleToggle}
             submitBid={this.submitBid}
+            afterBid={() => this.setState({ bid: 0 })}
             thisPlayer={playerId}
             gameScore={gameScore}
             status={status}
@@ -745,6 +749,7 @@ class Game extends Component {
         </div>
         <CardRow cards={hand} playCard={this.playCard} />
         <Modal
+          centered
           isOpen={Boolean(winner)}
           toggle={this.closeModal}
           onOpened={() => {
@@ -765,7 +770,7 @@ class Game extends Component {
             </Container>
           </ModalBody>
         </Modal>
-        <Modal isOpen={status === "over"}>
+        <Modal centered isOpen={status === "over"}>
           <ModalHeader>
             <Row>
               <Col className="d-flex justify-content-center mb-3">
