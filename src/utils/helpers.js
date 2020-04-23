@@ -63,8 +63,8 @@ export const calculateLeader = ({ cards, trump, leadSuit }) =>
     return b.rank - a.rank
   })[0]
 
-export const getScore = tricks => {
-  return tricks.reduce((scoreObj, tr) => {
+export const getScore = tricks =>
+  tricks.reduce((scoreObj, tr) => {
     const newScoreObj = { ...scoreObj }
     if (tr.winner) {
       if (!newScoreObj[tr.winner]) {
@@ -74,7 +74,6 @@ export const getScore = tricks => {
     }
     return newScoreObj
   }, {})
-}
 
 export const getNextPlayer = ({ playerId, players }) => {
   const playerIndex = players.findIndex(p => p.playerId === playerId)

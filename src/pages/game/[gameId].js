@@ -185,33 +185,42 @@ class Game extends Component {
         this.gameRef.on("child_added", data => {
           let value = data.val()
           const key = data.key
-          if (key === "roundId") {
-            this.listenToRound(value)
-            this.listenToHand({ playerId, roundId: value })
-          }
-          this.setState(prevState => ({
-            game: { ...prevState.game, [key]: value }
-          }))
-          if (key === "currentPlayer" && value === playerId) {
-            this.yourTurn()
-          }
+          this.setState(
+            prevState => ({
+              game: { ...prevState.game, [key]: value }
+            }),
+            async () => {
+              if (key === "roundId") {
+                await Promise.all([
+                  this.listenToRound(value),
+                  this.listenToHand({ playerId, roundId: value })
+                ])
+              }
+              if (key === "currentPlayer" && value === playerId) {
+                await this.yourTurn()
+              }
+            }
+          )
         }),
         this.gameRef.on("child_changed", data => {
           let value = data.val()
           const key = data.key
-          this.setState(prevState =>
-            key === "roundId"
-              ? {
-                  showScore: true,
-                  game: { ...prevState.game, [key]: value }
-                }
-              : {
-                  game: { ...prevState.game, [key]: value }
-                }
+          this.setState(
+            prevState =>
+              key === "roundId"
+                ? {
+                    showScore: true,
+                    game: { ...prevState.game, [key]: value }
+                  }
+                : {
+                    game: { ...prevState.game, [key]: value }
+                  },
+            async () => {
+              if (key === "currentPlayer" && value === playerId) {
+                await this.yourTurn()
+              }
+            }
           )
-          if (key === "currentPlayer" && value === playerId) {
-            this.yourTurn()
-          }
         }),
         this.gameRef.on("child_removed", data => {
           const key = data.key
