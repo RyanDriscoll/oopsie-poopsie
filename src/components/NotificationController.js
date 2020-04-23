@@ -16,6 +16,12 @@ class NotificationController extends React.Component {
   }
   static contextType = CombinedContext
 
+  componentDidMount() {
+    if (navigator) {
+      navigator.serviceWorker.register("/sw.js")
+    }
+  }
+
   handlePermissionGranted = () => {
     console.log("Permission Granted")
     this.setState({
