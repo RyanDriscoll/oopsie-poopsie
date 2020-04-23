@@ -12,9 +12,8 @@ import styles from "../styles/components/players.module.scss"
 import CombinedContext from "../context/CombinedContext"
 import Modal from "reactstrap/lib/Modal"
 import ModalBody from "reactstrap/lib/ModalBody"
-import ModalHeader from "reactstrap/lib/ModalHeader"
-import ModalFooter from "reactstrap/lib/ModalFooter"
-import { Container } from "next/app"
+import Container from "reactstrap/lib/Container"
+
 const Players = ({
   players,
   currentPlayer,
