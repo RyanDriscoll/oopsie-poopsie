@@ -29,15 +29,26 @@ exports.newGame = async (req, res) => {
 
 exports.startGame = async (req, res) => {
   try {
-    const { ref, body } = req
-    let { gameId, players, numCards } = body
+    const {
+      ref,
+      body: { gameId }
+    } = req
+    let [players, numCards] = await Promise.all([
+      ref("players")
+        .orderByChild("gameId")
+        .equalTo(gameId)
+        .once("value")
+        .then(snap => snap.val()),
+      ref(`games/${gameId}/numCards`)
+        .once("value")
+        .then(snap => snap.val())
+    ])
     players = Object.values(players)
     const deckSize = 52
     const numPlayers = players.length
     while (numPlayers * numCards > deckSize) {
       numCards--
     }
-
     const deck = new Deck()
 
     const hands = {}
@@ -79,7 +90,6 @@ exports.startGame = async (req, res) => {
 
     updateObj[`games/${gameId}/timestamp`] = new Date()
     updateObj[`games/${gameId}/numPlayers`] = numPlayers
-    updateObj[`games/${gameId}/numCards`] = numCards
     updateObj[`games/${gameId}/descending`] = true
     updateObj[`games/${gameId}/roundId`] = roundKey
     updateObj[`games/${gameId}/roundNum`] = 1
@@ -88,6 +98,7 @@ exports.startGame = async (req, res) => {
     updateObj[`games/${gameId}/dealer`] = dealer.playerId
     updateObj[`games/${gameId}/status`] = "bid"
     updateObj[`rounds/${roundKey}/roundId`] = roundKey
+    updateObj[`rounds/${roundKey}/numPlayers`] = numPlayers
     updateObj[`rounds/${roundKey}/trump`] = trump
     updateObj[`rounds/${roundKey}/gameId`] = gameId
     updateObj[`rounds/${roundKey}/tricks/${trickKey}/trickId`] = trickKey
@@ -248,6 +259,7 @@ exports.nextRound = async (req, res) => {
       const playersObj = playersSnap.val()
       const newDealer = playersObj[dealer]
       const newCurrentPlayer = playersObj[newDealer.nextPlayer]
+      const numPlayers = Object.keys(playersObj).length
 
       const trump = deck.deal().suit
       const roundRef = ref("rounds").push()
@@ -264,6 +276,7 @@ exports.nextRound = async (req, res) => {
       updateObj[`games/${gameId}/dealer`] = newDealer.playerId
       updateObj[`games/${gameId}/currentPlayer`] = newCurrentPlayer.playerId
       updateObj[`rounds/${roundKey}/roundId`] = roundKey
+      updateObj[`rounds/${roundKey}/numPlayers`] = numPlayers
       updateObj[`rounds/${roundKey}/trump`] = trump
       updateObj[`rounds/${roundKey}/gameId`] = gameId
       updateObj[`rounds/${roundKey}/tricks/${trickKey}/trickId`] = trickKey
