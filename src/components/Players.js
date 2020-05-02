@@ -60,7 +60,7 @@ const Players = ({
             playerScore = ""
           }
           return (
-            <li key={playerId} className={classNames({})}>
+            <li key={playerId}>
               <Row
                 className={classNames({
                   [styles.current_player_arrow]: isCurrent,
@@ -123,6 +123,19 @@ const Players = ({
                   <Container>
                     <Row className="justify-content-center">
                       <h1>Bid</h1>
+                    </Row>
+                    <Row className="justify-content-center mb-3">
+                      <div>
+                        {newPlayers &&
+                          newPlayers
+                            .filter(p => !!bids && !!bids[p.playerId])
+                            .map(({ playerId, name }) => (
+                              <h2
+                                className="mb-2"
+                                key={playerId}
+                              >{`${name}: ${bids[playerId]}`}</h2>
+                            ))}
+                      </div>
                     </Row>
                     <Row className="justify-content-center">
                       <Form>
