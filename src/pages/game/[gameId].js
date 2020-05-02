@@ -29,7 +29,6 @@ import {
   getAvailableTricks,
   handleDirtyGame
 } from "../../utils/helpers"
-import Spinner from "../../components/Spinner"
 import Players from "../../components/Players"
 import { withRouter } from "next/router"
 import ModalHeader from "reactstrap/lib/ModalHeader"
@@ -48,7 +47,6 @@ class Game extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      loading: false,
       game: null,
       players: {},
       playerId: null,
@@ -80,8 +78,15 @@ class Game extends Component {
     try {
       const { gameId } = this.props
       const { game } = this.state
-      const playerId = localStorage.getItem(`oh-shit-game-${gameId}-player-id`)
-      this.setState({ playerId })
+      const playerId = localStorage.getItem(`oh-shit-${gameId}-player-id`)
+      const playerName = localStorage.getItem("player-name") || ""
+      Object.keys(localStorage).forEach(key => {
+        const val = localStorage[key]
+        if (key.startsWith("oh-shit") && val !== playerId) {
+          localStorage.removeItem(key)
+        }
+      })
+      this.setState({ playerId, playerName })
       await this.listenToPlayers(gameId, playerId)
       if (playerId) {
         await Promise.all([
@@ -91,6 +96,7 @@ class Game extends Component {
       }
       this.context.setState({ mounted: true })
     } catch (error) {
+      this.context.setState({ mounted: true, error: true })
       console.error(`$$>>>>: Game -> componentDidMount -> error`, error)
     }
   }
@@ -174,6 +180,7 @@ class Game extends Component {
         })
       ])
     } catch (error) {
+      this.context.setState({ error: true })
       console.error(`$$>>>>: Game -> listenToPlayers -> error`, error)
     }
   }
@@ -230,6 +237,7 @@ class Game extends Component {
         })
       ])
     } catch (error) {
+      this.context.setState({ error: true })
       console.error(`$$>>>>: Game -> listenToGame -> error`, error)
     }
   }
@@ -241,9 +249,16 @@ class Game extends Component {
         await Promise.all([
           this.handRef.on("child_added", data => {
             const card = data.val()
-            this.setState(prevState => ({
-              hand: [...prevState.hand, card]
-            }))
+            this.setState(prevState => {
+              const cardIndex = prevState.hand.findIndex(
+                c => c.cardId === card.cardId
+              )
+              if (cardIndex === -1) {
+                return {
+                  hand: [...prevState.hand, card]
+                }
+              }
+            })
           }),
           this.handRef.on("child_removed", data => {
             const value = data.val()
@@ -254,6 +269,7 @@ class Game extends Component {
           })
         ])
       } catch (error) {
+        this.context.setState({ error: true })
         console.error(`$$>>>>: Game -> listenToHand -> error`, error)
       }
     }
@@ -272,6 +288,7 @@ class Game extends Component {
         })
       })
     } catch (error) {
+      this.context.setState({ error: true })
       console.error(`$$>>>>: error`, error)
     }
   }
@@ -331,6 +348,7 @@ class Game extends Component {
         })
       ])
     } catch (error) {
+      this.context.setState({ error: true })
       console.error(`$$>>>>: error`, error)
     }
   }
@@ -397,6 +415,7 @@ class Game extends Component {
         })
       ])
     } catch (error) {
+      this.context.setState({ error: true })
       console.error(`$$>>>>: error`, error)
     }
   }
@@ -409,6 +428,7 @@ class Game extends Component {
         this.listenToBid(roundId)
       ])
     } catch (error) {
+      this.context.setState({ error: true })
       console.error(`$$>>>>: Game -> listenToRound -> error`, error)
     }
   }
@@ -427,35 +447,36 @@ class Game extends Component {
 
   addPlayer = async () => {
     try {
-      this.setState({ loading: true })
+      this.context.setState({ loading: true })
       const { gameId } = this.props
       const { playerName } = this.state
       const response = await addPlayer({ playerName, gameId })
       if (response.ok) {
         const { playerId } = await response.json()
-        localStorage.setItem(`oh-shit-game-${gameId}-player-id`, playerId)
+        localStorage.setItem(`oh-shit-${gameId}-player-id`, playerId)
+        localStorage.setItem("player-name", playerName)
         this.setState({ playerId })
         this.listenToGame({ gameId, playerId })
-        this.setState({ loading: false })
+        this.context.setState({ loading: false })
       }
     } catch (error) {
-      this.setState({ loading: false })
+      this.context.setState({ loading: false, error: true })
       console.error(`$$>>>>: Game -> addPlayer -> error`, error)
     }
   }
 
   startGame = async () => {
     try {
-      this.setState({ loading: true })
+      this.context.setState({ loading: true })
       const { gameId } = this.props
       let {
         players,
         game: { numCards }
       } = this.state
-      await startGame({ gameId, players, numCards })
-      this.setState({ loading: false })
+      await startGame({ gameId })
+      this.context.setState({ loading: false })
     } catch (error) {
-      this.setState({ loading: false })
+      this.context.setState({ loading: false, error: true })
       console.error(`$$>>>>: Game -> startGame -> error`, error)
     }
   }
@@ -465,7 +486,7 @@ class Game extends Component {
       if (this.autoPlayTimeout) {
         clearTimeout(this.autoPlayTimeout)
       }
-      this.setState({ loading: true })
+      this.context.setState({ loading: true })
       const {
         game,
         hand,
@@ -541,9 +562,9 @@ class Game extends Component {
           }
         })
       }
-      this.setState({ loading: false })
+      this.context.setState({ loading: false })
     } catch (error) {
-      this.setState({ loading: false })
+      this.context.setState({ loading: false, error: true })
       console.error(`$$>>>>: Game -> error`, error)
     }
   }
@@ -584,13 +605,14 @@ class Game extends Component {
       }
       await nextRound(body)
     } catch (error) {
+      this.context.setState({ error: true })
       console.error(`$$>>>>: nextRound -> error`, error)
     }
   }
 
   submitBid = async () => {
     try {
-      this.setState({ loading: true })
+      this.context.setState({ loading: true })
       const { gameId } = this.props
       const { bid, playerId, game, bids, players } = this.state
       const { numPlayers, roundId } = game
@@ -606,9 +628,9 @@ class Game extends Component {
       }
 
       await submitBid(body)
-      this.setState({ loading: false })
+      this.context.setState({ loading: false })
     } catch (error) {
-      this.setState({ loading: false })
+      this.context.setState({ loading: false, error: true })
       console.error(`$$>>>>: Game -> error`, error)
     }
   }
@@ -666,7 +688,6 @@ class Game extends Component {
       tricks,
       trickIndex,
       roundScore,
-      loading,
       winner,
       showScore,
       showYourTurn,
@@ -879,7 +900,6 @@ class Game extends Component {
             </Row>
           </ModalBody>
         </Modal>
-        <Spinner loading={loading} />
         <NotificationController
           showNotification={showYourTurn}
           onClose={() => this.setState({ showYourTurn: false })}

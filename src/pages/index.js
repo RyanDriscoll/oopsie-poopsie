@@ -33,6 +33,7 @@ const CreateGame = ({ origin }) => {
 
   useEffect(() => {
     setState({ mounted: true })
+    setName(localStorage.getItem("player-name") || "")
     return () => {
       setState({ mounted: false })
     }
@@ -61,6 +62,7 @@ const CreateGame = ({ origin }) => {
 
   const initializeGame = async () => {
     try {
+      setState({ loading: true })
       const body = {
         game,
         name,
@@ -71,13 +73,16 @@ const CreateGame = ({ origin }) => {
       const response = await newGame(body)
       if (response.ok) {
         const { playerId, gameId } = await response.json()
-        localStorage.setItem(`oh-shit-game-${gameId}-player-id`, playerId)
+        localStorage.setItem(`oh-shit-${gameId}-player-id`, playerId)
+        localStorage.setItem(`player-name`, name)
         setGameId(gameId)
         setUrl(`${origin}/game/${gameId}`)
         setName("")
         setGame("")
       }
+      setState({ loading: false })
     } catch (error) {
+      setState({ loading: false, error: true })
       console.error(`$$>>>>: initializeGame -> error`, error)
     }
   }
