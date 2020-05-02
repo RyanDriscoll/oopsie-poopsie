@@ -16,6 +16,8 @@ import {
   BLACK,
   WHITE
 } from "../utils/constants"
+import ErrorModal from "../components/ErrorModal"
+import Spinner from "../components/Spinner"
 
 export default class MyApp extends App {
   constructor(props) {
@@ -24,7 +26,9 @@ export default class MyApp extends App {
       setState: this.setState.bind(this),
       mute: true,
       dark: true,
-      mounted: false
+      loading: false,
+      mounted: false,
+      error: false
     }
   }
 
@@ -58,7 +62,7 @@ export default class MyApp extends App {
 
   render() {
     const { Component, pageProps } = this.props
-    const { dark } = this.state
+    const { dark, loading } = this.state
 
     return (
       <CombinedProvider value={this.state}>
@@ -68,6 +72,8 @@ export default class MyApp extends App {
         </Head>
         <Layout>
           <Component {...pageProps} />
+          <ErrorModal />
+          <Spinner loading={loading} />
         </Layout>
         <style global jsx>{`
           body {
