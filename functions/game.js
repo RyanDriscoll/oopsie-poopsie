@@ -1,14 +1,27 @@
+const ShortUniqueId = require("short-unique-id").default
 const Deck = require("./deck")
+
+const uid = new ShortUniqueId({ length: 4 })
 
 exports.newGame = async (req, res) => {
   try {
     const { ref, body } = req
     const { game, name, numCards, noBidPoints, dirty } = body
-    const newGameRef = ref("games").push()
-    const gameId = newGameRef.key
+    let gameId = uid()
+    let unique = false
+    while (!unique) {
+      // eslint-disable-next-line no-await-in-loop
+      unique = await ref(`games/${gameId}`)
+        .once("value")
+        .then(snap => !snap.exists())
+      if (!unique) {
+        gameId = uid()
+      }
+    }
     const playerRef = ref(`players`).push()
     const playerId = playerRef.key
     const updateObj = {}
+    updateObj[`games/${gameId}/timestamp`] = new Date()
     updateObj[`games/${gameId}/name`] = game
     updateObj[`games/${gameId}/gameId`] = gameId
     updateObj[`games/${gameId}/status`] = "pending"
@@ -88,7 +101,6 @@ exports.startGame = async (req, res) => {
       updateObj[`players/${player.playerId}/nextPlayer`] = player.nextPlayer
     })
 
-    updateObj[`games/${gameId}/timestamp`] = new Date()
     updateObj[`games/${gameId}/numPlayers`] = numPlayers
     updateObj[`games/${gameId}/descending`] = true
     updateObj[`games/${gameId}/roundId`] = roundKey

@@ -16,16 +16,19 @@ import styles from "../styles/pages/home.module.scss"
 import { CopyIcon } from "../components/Icons"
 import Col from "reactstrap/lib/Col"
 import CombinedContext from "../context/CombinedContext"
+import classnames from "classnames"
 
-const CreateGame = ({ origin }) => {
+const CreateGame = ({ origin, router }) => {
   const [name, setName] = useState("")
   const [game, setGame] = useState("")
+  const [gameCode, setGameCode] = useState("")
   const [gameId, setGameId] = useState("")
   const [url, setUrl] = useState("")
   const [copySuccess, setCopySuccess] = useState("")
   const [dirty, setDirty] = useState(false)
   const [noBidPoints, setNoBidPoints] = useState(false)
   const [numCards, setNumCards] = useState(5)
+  const [create, setCreate] = useState(true)
 
   const gameUrlRef = useRef(null)
 
@@ -47,6 +50,9 @@ const CreateGame = ({ origin }) => {
         break
       case "game":
         setGame(value)
+        break
+      case "game-code":
+        setGameCode(value)
         break
       default:
         break
@@ -72,11 +78,11 @@ const CreateGame = ({ origin }) => {
       }
       const response = await newGame(body)
       if (response.ok) {
-        const { playerId, gameId } = await response.json()
-        localStorage.setItem(`oh-shit-${gameId}-player-id`, playerId)
+        const { playerId, gameId: gameIdResponse } = await response.json()
+        localStorage.setItem(`oh-shit-${gameIdResponse}-player-id`, playerId)
         localStorage.setItem(`player-name`, name)
-        setGameId(gameId)
-        setUrl(`${origin}/game/${gameId}`)
+        setGameId(gameIdResponse)
+        setUrl(`${origin}/game/${gameIdResponse}`)
         setName("")
         setGame("")
       }
@@ -87,6 +93,10 @@ const CreateGame = ({ origin }) => {
     }
   }
 
+  const joinGame = () => {
+    router.push("/game/[gameId]", `/game/${gameCode}`)
+  }
+
   const copyToClipboard = e => {
     gameUrlRef.current.select()
     document.execCommand("copy")
@@ -95,9 +105,15 @@ const CreateGame = ({ origin }) => {
   }
 
   return (
-    <Container>
+    <Container id={styles.home}>
       {gameId ? (
         <>
+          <Row className="justify-content-center m-4">
+            <Col xs="10" sm="7">
+              <h2>Game Code</h2>
+              <h2 className="red-text m-4">{gameId}</h2>
+            </Col>
+          </Row>
           <Row className="justify-content-center m-4">
             <h3>Share this link to invite other players</h3>
           </Row>
@@ -130,98 +146,150 @@ const CreateGame = ({ origin }) => {
         </>
       ) : (
         <Row className="justify-content-center">
-          <Col xs="10" sm="7">
-            <Form>
-              <FormGroup>
-                <Label for="game">Game Name</Label>
-                <Input
-                  data-lpignore="true"
-                  type="text"
-                  name="game"
-                  id="game"
-                  value={game}
-                  onChange={handleChange}
-                  placeholder="optional"
-                />
-              </FormGroup>
-              <FormGroup>
-                <Label for="name">User Name</Label>
-                <Input
-                  data-lpignore="true"
-                  type="text"
-                  name="name"
-                  id="name"
-                  value={name}
-                  onChange={handleChange}
-                />
-              </FormGroup>
-              <Col xs="12" className="p-0">
-                <FormGroup>
-                  <Label for="num-cards">Number of cards</Label>
-                  <InputGroup>
-                    <InputGroupAddon addonType="prepend">
-                      <Button
-                        color="danger"
-                        onClick={e => handleToggle(false, e.target.value)}
-                      >
-                        -
-                      </Button>
-                    </InputGroupAddon>
-                    <Input
-                      data-lpignore="true"
-                      type="text"
-                      value={numCards}
-                      name="num-cards"
-                      id="num-cards"
-                      className={styles.num_cards}
-                      readOnly
-                    />
-                    <InputGroupAddon addonType="append">
-                      <Button
-                        color="success"
-                        onClick={e => handleToggle(true, e.target.value)}
-                      >
-                        +
-                      </Button>
-                    </InputGroupAddon>
-                  </InputGroup>
-                </FormGroup>
-              </Col>
-
-              <FormGroup check>
-                <Label check>
-                  <Input
-                    type="checkbox"
-                    id="bid-checkbox"
-                    checked={dirty}
-                    onChange={() => setDirty(!dirty)}
-                  />{" "}
-                  Dirty bids only
-                </Label>
-              </FormGroup>
-
-              <FormGroup check>
-                <Label check>
-                  <Input
-                    type="checkbox"
-                    id="bid-point-checkbox"
-                    checked={noBidPoints}
-                    onChange={() => setNoBidPoints(!noBidPoints)}
-                  />{" "}
-                  No points for bad bids
-                </Label>
-              </FormGroup>
-
-              <div className="d-flex justify-content-center mt-3">
-                <Button
-                  disabled={!name}
-                  color="primary"
-                  onClick={initializeGame}
+          <Col xs="12" sm="9">
+            <Row className="my-5">
+              <Col xs="6">
+                <h2
+                  className={classnames({
+                    [styles.toggle]: true,
+                    [styles.selected]: create
+                  })}
+                  onClick={() => setCreate(true)}
                 >
-                  NEW GAME
-                </Button>
-              </div>
-            </Form>
+                  create a new game
+                </h2>
+              </Col>
+              <Col xs="6">
+                <h2
+                  className={classnames({
+                    [styles.toggle]: true,
+                    [styles.selected]: !create
+                  })}
+                  onClick={() => setCreate(false)}
+                >
+                  join an existing game
+                </h2>
+              </Col>
+            </Row>
+          </Col>
+          <Col xs="10" sm="7">
+            {create ? (
+              <Form>
+                <FormGroup>
+                  <Label for="game">Game Name</Label>
+                  <Input
+                    data-lpignore="true"
+                    type="text"
+                    name="game"
+                    id="game"
+                    value={game}
+                    onChange={handleChange}
+                    placeholder="optional"
+                  />
+                </FormGroup>
+                <FormGroup>
+                  <Label for="name">User Name</Label>
+                  <Input
+                    data-lpignore="true"
+                    type="text"
+                    name="name"
+                    id="name"
+                    value={name}
+                    onChange={handleChange}
+                  />
+                </FormGroup>
+                <Col xs="12" className="p-0">
+                  <FormGroup>
+                    <Label for="num-cards">Number of cards</Label>
+                    <InputGroup>
+                      <InputGroupAddon addonType="prepend">
+                        <Button
+                          color="danger"
+                          onClick={e => handleToggle(false, e.target.value)}
+                        >
+                          -
+                        </Button>
+                      </InputGroupAddon>
+                      <Input
+                        data-lpignore="true"
+                        type="text"
+                        value={numCards}
+                        name="num-cards"
+                        id="num-cards"
+                        className={styles.num_cards}
+                        readOnly
+                      />
+                      <InputGroupAddon addonType="append">
+                        <Button
+                          color="success"
+                          onClick={e => handleToggle(true, e.target.value)}
+                        >
+                          +
+                        </Button>
+                      </InputGroupAddon>
+                    </InputGroup>
+                  </FormGroup>
+                </Col>
+
+                <FormGroup check>
+                  <Label check>
+                    <Input
+                      type="checkbox"
+                      id="bid-checkbox"
+                      checked={dirty}
+                      onChange={() => setDirty(!dirty)}
+                    />{" "}
+                    Dirty bids only
+                  </Label>
+                </FormGroup>
+
+                <FormGroup check>
+                  <Label check>
+                    <Input
+                      type="checkbox"
+                      id="bid-point-checkbox"
+                      checked={noBidPoints}
+                      onChange={() => setNoBidPoints(!noBidPoints)}
+                    />{" "}
+                    No points for bad bids
+                  </Label>
+                </FormGroup>
+
+                <div className="d-flex justify-content-center mt-3">
+                  <Button
+                    disabled={!name}
+                    color="primary"
+                    onClick={initializeGame}
+                  >
+                    NEW GAME
+                  </Button>
+                </div>
+              </Form>
+            ) : (
+              <Form>
+                <FormGroup>
+                  <Label for="game-code">Game Code</Label>
+                  <Input
+                    data-lpignore="true"
+                    type="text"
+                    name="game-code"
+                    id="game-code"
+                    value={gameCode}
+                    onChange={handleChange}
+                    placeholder="Jb2X"
+                  />
+                </FormGroup>
+                <div className="d-flex justify-content-center mt-3">
+                  <Button
+                    disabled={gameCode.length < 4}
+                    color="primary"
+                    onClick={joinGame}
+                  >
+                    JOIN GAME
+                  </Button>
+                </div>
+              </Form>
+            )}
           </Col>
         </Row>
       )}

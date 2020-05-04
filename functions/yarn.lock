@@ -2058,6 +2058,11 @@ shebang-regex@^1.0.0:
   resolved "https://registry.npmjs.org/shebang-regex/-/shebang-regex-1.0.0.tgz#da42f49740c0b42db2ca9728571cb190c98efea3"
   integrity sha1-2kL0l0DAtC2yypcoVxyxkMmO/qM=
 
+short-unique-id@^3.0.0-rc1:
+  version "3.0.0-rc1"
+  resolved "https://registry.npmjs.org/short-unique-id/-/short-unique-id-3.0.0-rc1.tgz#1558da90f9655d1fe8d5e6409bafb0bb0f12042c"
+  integrity sha512-KsV9bOCyXvyZ/vpEXzZtLsmeTDCFLBa8aOMqVA9sTmgiZ4/F5xDwCrV0GgjIEvSJ5ahdJx52sWmn3qc4vWFGqA==
+
 side-channel@^1.0.1:
   version "1.0.2"
   resolved "https://registry.npmjs.org/side-channel/-/side-channel-1.0.2.tgz#df5d1abadb4e4bf4af1cd8852bf132d2f7876947"
