@@ -34,6 +34,8 @@ import { withRouter } from "next/router"
 import ModalHeader from "reactstrap/lib/ModalHeader"
 import NotificationController from "../../components/NotificationController"
 import {
+  newGame,
+  replayGame,
   startGame,
   playCard,
   submitBid,
@@ -43,27 +45,29 @@ import {
 } from "../../utils/api"
 import CustomTrump from "../../components/CustomTrump"
 
+const INITIAL_STATE = {
+  game: null,
+  players: {},
+  playerId: null,
+  playerName: "",
+  hand: [],
+  isHost: false,
+  bid: 0,
+  bids: {},
+  tricks: [],
+  trickIndex: 0,
+  trickWinner: null,
+  roundScore: {},
+  showScore: false,
+  showYourTurn: false,
+  trump: null,
+  queuedCard: null
+}
+
 class Game extends Component {
   constructor(props) {
     super(props)
-    this.state = {
-      game: null,
-      players: {},
-      playerId: null,
-      playerName: "",
-      hand: [],
-      isHost: false,
-      bid: 0,
-      bids: {},
-      tricks: [],
-      trickIndex: 0,
-      trickWinner: null,
-      roundScore: {},
-      showScore: false,
-      showYourTurn: false,
-      trump: null,
-      queuedCard: null
-    }
+    this.state = INITIAL_STATE
 
     this.gameRef
     this.playersRef
@@ -75,9 +79,37 @@ class Game extends Component {
   }
 
   async componentDidMount() {
+    this.initializeGame()
+  }
+
+  async componentWillUnmount() {
+    this.removeListeners()
+    const { playerId } = this.state
+    const { gameId } = this.props
+    if (playerId) {
+      await updatePlayer({ playerId, gameId, present: true })
+    }
+  }
+
+  async componentDidUpdate(prevProps, prevState) {
+    const { playerId } = this.state
+    if (playerId && prevState.playerId !== playerId) {
+      this.listenForWindowClose(playerId)
+    }
+    if (
+      this.props.gameId &&
+      prevProps.gameId &&
+      this.props.gameId !== prevProps.gameId
+    ) {
+      this.removeListeners()
+      await this.initializeGame()
+    }
+  }
+
+  initializeGame = async () => {
     try {
+      this.setState(INITIAL_STATE)
       const { gameId } = this.props
-      const { game } = this.state
       const playerId = localStorage.getItem(`oh-shit-${gameId}-player-id`)
       const playerName = localStorage.getItem("player-name") || ""
       Object.keys(localStorage).forEach(key => {
@@ -101,7 +133,7 @@ class Game extends Component {
     }
   }
 
-  async componentWillUnmount() {
+  removeListeners = () => {
     const { gameId } = this.props
     if (this.gameRef) {
       this.gameRef.off()
@@ -120,17 +152,6 @@ class Game extends Component {
     }
     if (this.trumpRef) {
       this.trumpRef.off()
-    }
-    const { playerId } = this.state
-    if (playerId) {
-      await updatePlayer({ playerId, gameId, present: true })
-    }
-  }
-
-  componentDidUpdate(_, prevState) {
-    const { playerId } = this.state
-    if (playerId && prevState.playerId !== playerId) {
-      this.listenForWindowClose(playerId)
     }
   }
 
@@ -445,6 +466,33 @@ class Game extends Component {
     }
   }
 
+  playAgain = async () => {
+    try {
+      this.context.setState({ loading: true })
+      const {
+        game: { name, numCards, noBidPoints, dirty, gameId },
+        playerName
+      } = this.state
+      const body = {
+        game: name,
+        name: playerName,
+        numCards,
+        noBidPoints,
+        dirty
+      }
+      const response = await newGame(body)
+      if (response.ok) {
+        const { playerId, gameId: gameIdResponse } = await response.json()
+        localStorage.setItem(`oh-shit-${gameIdResponse}-player-id`, playerId)
+        await replayGame({ oldGameId: gameId, newGameId: gameIdResponse })
+      }
+      this.context.setState({ loading: false })
+    } catch (error) {
+      this.context.setState({ loading: false, error: true })
+      console.error(`$$>>>>: playAgain -> error`, error)
+    }
+  }
+
   addPlayer = async () => {
     try {
       this.context.setState({ loading: true })
@@ -703,7 +751,8 @@ class Game extends Component {
       dealer,
       roundNum,
       numRounds,
-      numCards
+      numCards,
+      nextGame
     if (game) {
       name = game.name
       status = game.status
@@ -714,6 +763,7 @@ class Game extends Component {
       roundNum = game.roundNum
       numRounds = game.numRounds
       numCards = game.numCards
+      nextGame = game.nextGame
     }
 
     const trick = tricks[trickIndex]
@@ -881,16 +931,34 @@ class Game extends Component {
                 </Row>
               ))}
             <Row>
-              <Col className="d-flex justify-content-center mt-3">
+              <Col>
                 {status === "over" ? (
-                  <Button
-                    color="success"
-                    onClick={() => {
-                      this.props.router.push("/")
-                    }}
-                  >
-                    NEW GAME
-                  </Button>
+                  <>
+                    <div className="mt-3 text-center">
+                      <Button
+                        color="primary"
+                        onClick={() => {
+                          this.props.router.push("/")
+                        }}
+                      >
+                        HOME
+                      </Button>
+                    </div>
+                    {isHost && (
+                      <div className="mt-3 text-center">
+                        <Button color="success" onClick={this.playAgain}>
+                          PLAY AGAIN
+                        </Button>
+                      </div>
+                    )}
+                    {nextGame && (
+                      <div className="mt-3 text-center">
+                        <Link href={`/game/[gameId]`} as={`/game/${nextGame}`}>
+                          <a>JOIN NEXT GAME</a>
+                        </Link>
+                      </div>
+                    )}
+                  </>
                 ) : (
                   <Button color="primary" onClick={this.closeModal}>
                     CLOSE

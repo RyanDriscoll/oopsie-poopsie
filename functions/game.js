@@ -40,6 +40,18 @@ exports.newGame = async (req, res) => {
   }
 }
 
+exports.replayGame = async (req, res) => {
+  try {
+    const { ref, body } = req
+    const { oldGameId, newGameId } = body
+    await ref(`games/${oldGameId}`).update({ nextGame: newGameId })
+    return res.sendStatus(200)
+  } catch (error) {
+    console.log(`$$>>>>: exports.replayGame -> error`, error)
+    return res.sendStatus(500)
+  }
+}
+
 exports.startGame = async (req, res) => {
   try {
     const {
