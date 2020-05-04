@@ -34,3 +34,50 @@ app.post("/next-round", nextRound)
 app.put("/update-player/:playerId/:gameId/:present", updatePlayer)
 
 exports.api = functions.https.onRequest(app)
+
+exports.clearOldGameData = functions.pubsub
+  .schedule("0 0 * * 1")
+  .timeZone("America/Denver")
+  .onRun(async context => {
+    const date = new Date()
+    date.setDate(date.getDate() - 7)
+    const gameSnap = await Promise.all([
+      ref("games")
+        .orderByChild("timestamp")
+        .endAt(date.toISOString())
+        .once("value")
+    ])
+
+    if (gameSnap.exists()) {
+      console.log(`DELETING ${gameSnap.numChildren()} OLD GAMES`)
+
+      const promiseArray = []
+      gameSnap.forEach(snap => {
+        const game = snap.val()
+        const gameId = snap.key
+        promiseArray.push(
+          ref(`hands`)
+            .orderByChild("gameId")
+            .equalTo(gameId)
+            .once("value")
+            .then(snap => snap.ref.remove()),
+          ref(`players`)
+            .orderByChild("gameId")
+            .equalTo(gameId)
+            .once("value")
+            .then(snap => snap.ref.remove()),
+          ref(`rounds`)
+            .orderByChild("gameId")
+            .equalTo(gameId)
+            .once("value")
+            .then(snap => snap.ref.remove()),
+          snap.ref.remove()
+        )
+      })
+      await Promise.all(promiseArray)
+    } else {
+      console.log("NO OLD GAMES TO DELETE")
+    }
+
+    return null
+  })
