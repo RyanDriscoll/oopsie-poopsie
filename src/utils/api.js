@@ -54,6 +54,18 @@ export const addPlayer = async body =>
     body: JSON.stringify(body)
   })
 
+export const replayGame = async body =>
+  fetch(
+    `https://us-central1-oh-shit-ac7c3.cloudfunctions.net/api/replay-game`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(body)
+    }
+  )
+
 export const updatePlayer = async ({ playerId, gameId, present }) =>
   fetch(
     `https://us-central1-oh-shit-ac7c3.cloudfunctions.net/api/update-player/${playerId}/${gameId}/${present}`,
