@@ -1,21 +1,46 @@
 @import "../global/variables";
+#home {
+  .enter_game_button {
+    text-decoration: none;
+    font-family: $font-bold;
+    font-size: 25px;
 
-.enter_game_button {
-  text-decoration: none;
-  font-family: $font-bold;
-  font-size: 25px;
-}
+    &:hover {
+      text-decoration: underline;
+    }
+  }
 
-.copied {
-  position: absolute;
-  bottom: -35px;
-  text-align: center;
-  left: 0;
-  right: 0;
-  margin: auto;
-}
+  .copied {
+    position: absolute;
+    bottom: -35px;
+    text-align: center;
+    left: 0;
+    right: 0;
+    margin: auto;
+  }
 
-.num_cards {
-  text-align: center;
-  max-width: 50px;
+  .num_cards {
+    text-align: center;
+    max-width: 50px;
+  }
+
+  input {
+    border: none;
+    &::placeholder {
+      font-style: italic;
+    }
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    text-align: center;
+
+    &.selected {
+      background-color: $black;
+    }
+
+    &.toggle {
+      cursor: pointer;
+    }
+  }
 }
