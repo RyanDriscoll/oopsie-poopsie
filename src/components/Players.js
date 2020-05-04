@@ -128,7 +128,7 @@ const Players = ({
                       <div>
                         {newPlayers &&
                           newPlayers
-                            .filter(p => !!bids && !!bids[p.playerId])
+                            .filter(p => !!bids && bids[p.playerId] != null)
                             .map(({ playerId, name }) => (
                               <h2
                                 className="mb-2"
