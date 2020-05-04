@@ -5,6 +5,7 @@ const admin = require("firebase-admin")
 const {
   addPlayer,
   startGame,
+  replayGame,
   submitBid,
   playCard,
   nextRound,
@@ -28,6 +29,7 @@ app.use((req, res, next) => {
 app.post("/add-player", addPlayer)
 app.post("/new-game", newGame)
 app.post("/start-game", startGame)
+app.post("/replay-game", replayGame)
 app.post("/submit-bid", submitBid)
 app.post("/play-card", playCard)
 app.post("/next-round", nextRound)
