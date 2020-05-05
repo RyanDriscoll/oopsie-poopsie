@@ -724,6 +724,7 @@ class Game extends Component {
   }
 
   render() {
+    const { isMobile, router } = this.props
     const {
       game,
       players,
@@ -938,7 +939,7 @@ class Game extends Component {
                       <Button
                         color="primary"
                         onClick={() => {
-                          this.props.router.push("/")
+                          router.push("/")
                         }}
                       >
                         HOME
@@ -968,11 +969,13 @@ class Game extends Component {
             </Row>
           </ModalBody>
         </Modal>
-        <NotificationController
-          showNotification={showYourTurn}
-          onClose={() => this.setState({ showYourTurn: false })}
-          userName={userName}
-        />
+        {!isMobile && (
+          <NotificationController
+            showNotification={showYourTurn}
+            onClose={() => this.setState({ showYourTurn: false })}
+            userName={userName}
+          />
+        )}
       </>
     )
   }
@@ -983,8 +986,19 @@ Game.contextType = CombinedContext
 Game.getInitialProps = context => {
   const { req, query } = context
   const { gameId } = query
+  let userAgent
+  if (req) {
+    userAgent = req.headers["user-agent"]
+  } else {
+    userAgent = navigator.userAgent
+  }
+  const isMobile = Boolean(
+    userAgent.match(
+      /Android|BlackBerry|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i
+    )
+  )
 
-  return { gameId }
+  return { gameId, isMobile }
 }
 
 export default withRouter(Game)
