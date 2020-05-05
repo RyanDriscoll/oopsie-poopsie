@@ -73,8 +73,8 @@ const Header = () => {
         toggle={toggleRules}
         contentClassName="rules-modal"
       >
-        <ModalHeader toggle={toggleRules}>
-          <h2>rules</h2>
+        <ModalHeader tag={"h2"} toggle={toggleRules}>
+          rules
         </ModalHeader>
         <ModalBody>
           <p>
