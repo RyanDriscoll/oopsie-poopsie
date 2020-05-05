@@ -6,7 +6,7 @@ const uid = new ShortUniqueId({ length: 4 })
 exports.newGame = async (req, res) => {
   try {
     const { ref, body } = req
-    const { game, name, numCards, noBidPoints, dirty } = body
+    const { game, name, numCards, bidPoints, dirty } = body
     let gameId = uid()
     let unique = false
     while (!unique) {
@@ -26,7 +26,7 @@ exports.newGame = async (req, res) => {
     updateObj[`games/${gameId}/gameId`] = gameId
     updateObj[`games/${gameId}/status`] = "pending"
     updateObj[`games/${gameId}/dirty`] = dirty
-    updateObj[`games/${gameId}/noBidPoints`] = noBidPoints
+    updateObj[`games/${gameId}/noBidPoints`] = !bidPoints
     updateObj[`games/${gameId}/numCards`] = numCards
     updateObj[`players/${playerId}/name`] = name
     updateObj[`players/${playerId}/gameId`] = gameId
