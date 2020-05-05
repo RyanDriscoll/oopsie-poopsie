@@ -26,7 +26,7 @@ const CreateGame = ({ origin, router }) => {
   const [url, setUrl] = useState("")
   const [copySuccess, setCopySuccess] = useState("")
   const [dirty, setDirty] = useState(false)
-  const [noBidPoints, setNoBidPoints] = useState(false)
+  const [bidPoints, setBidPoints] = useState(false)
   const [numCards, setNumCards] = useState(5)
   const [create, setCreate] = useState(true)
 
@@ -73,7 +73,7 @@ const CreateGame = ({ origin, router }) => {
         game,
         name,
         numCards,
-        noBidPoints,
+        bidPoints,
         dirty
       }
       const response = await newGame(body)
@@ -248,10 +248,10 @@ const CreateGame = ({ origin, router }) => {
                     <Input
                       type="checkbox"
                       id="bid-point-checkbox"
-                      checked={noBidPoints}
-                      onChange={() => setNoBidPoints(!noBidPoints)}
+                      checked={bidPoints}
+                      onChange={() => setBidPoints(!bidPoints)}
                     />{" "}
-                    No points for bad bids
+                    Earn points for bad bids
                   </Label>
                 </FormGroup>
 
