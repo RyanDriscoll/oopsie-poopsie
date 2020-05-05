@@ -69,6 +69,23 @@ export default class MyApp extends App {
         <Head>
           <title>oopsie poopsie</title>
           <link rel="icon" type="image/png" href="/images/favicon.ico" />
+          <meta property="og:site_name" content="oopsie poopsie" />
+          <meta property="og:title" content="oopsie poopsie" />
+          <meta
+            property="og:description"
+            content="oopsie poopsie is a fun card game you play in real time with friends!"
+          />
+          <meta
+            property="og:image"
+            content="https://oopsie-poopsie.app/images/poop.png"
+          />
+          <meta property="og:image:alt" content="oopsie poopsie logo" />
+          <meta property="og:image:height" content="1200" />
+          <meta property="og:image:width" content="1200" />
+          <meta property="og:url" content="https://oopsie-poopsie.app" />
+          <meta property="og:type" content="website" />
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:image:alt" content="oopsie poopsie logo" />
         </Head>
         <Layout>
           <Component {...pageProps} />
