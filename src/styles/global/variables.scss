@@ -2,18 +2,22 @@
 @font-face {
   font-family: "Roboto_Mono_lt";
   src: url("/fonts/RobotoMono-Light.ttf");
+  font-display: optional;
 }
 @font-face {
   font-family: "Roboto_Mono";
   src: url("/fonts/RobotoMono-Regular.ttf");
+  font-display: optional;
 }
 @font-face {
   font-family: "Roboto_Mono_md";
   src: url("/fonts/RobotoMono-Medium.ttf");
+  font-display: optional;
 }
 @font-face {
   font-family: "Roboto_Mono_bd";
   src: url("/fonts/RobotoMono-Bold.ttf");
+  font-display: optional;
 }
 
 $font-regular: "Roboto_Mono", Arial, sans-serif;
