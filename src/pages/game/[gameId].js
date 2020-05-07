@@ -871,6 +871,7 @@ class Game extends Component {
           cards={hand}
           playCard={this.playCard}
           queuedCard={queuedCard}
+          leadSuit={leadSuit}
         />
         <Modal
           centered

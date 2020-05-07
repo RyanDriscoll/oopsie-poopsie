@@ -1,11 +1,20 @@
-import React, { useContext } from "react"
+import React, { useContext, useState, useEffect } from "react"
 
 import styles from "../styles/components/card-row.module.scss"
-import { getSource, getColor } from "../utils/helpers"
+import { getSource, getColor, isLegal } from "../utils/helpers"
 import CombinedContext from "../context/CombinedContext"
 import classNames from "classnames"
-const CardRow = ({ cards, playCard, queuedCard }) => {
+const CardRow = ({ cards, playCard, queuedCard, leadSuit }) => {
   const { dark } = useContext(CombinedContext)
+  const [illegalCard, setIllegalCard] = useState(null)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIllegalCard(null)
+    }, 320)
+    return () => {
+      clearTimeout(timer)
+    }
+  }, [illegalCard])
   const cardWidth = 100 / (cards.length || 1)
   return (
     <>
@@ -15,12 +24,17 @@ const CardRow = ({ cards, playCard, queuedCard }) => {
             <li
               className={classNames({
                 "playing-card": true,
+                [styles.shake]: illegalCard === card.cardId,
                 [styles.selected]:
                   queuedCard && queuedCard.cardId === card.cardId
               })}
               key={card.cardId}
               onClick={e => {
                 e.preventDefault()
+                const legal = isLegal({ hand: cards, card, leadSuit })
+                if (!legal) {
+                  setIllegalCard(card.cardId)
+                }
                 playCard(card)
               }}
             >
