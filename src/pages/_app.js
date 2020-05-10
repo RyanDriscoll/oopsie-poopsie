@@ -28,7 +28,9 @@ export default class MyApp extends App {
       dark: true,
       loading: false,
       mounted: false,
-      error: false
+      error: false,
+      visible: true,
+      timer: null
     }
   }
 
@@ -41,13 +43,24 @@ export default class MyApp extends App {
         () => {
           window
             .matchMedia("(prefers-color-scheme: dark)")
-            .addEventListener("change", () => {
-              this.setState({
-                dark: this.prefersDark()
-              })
-            })
+            .addEventListener("change", this.handleDarkMode)
         }
       )
+    }
+    if (document) {
+      document.addEventListener("visibilitychange", this.handleVisibilityChange)
+    }
+  }
+
+  componentWillUnmount() {
+    if (document) {
+      document.removeEventListener(
+        "visibilitychange",
+        this.handleVisibilityChange
+      )
+    }
+    if (window && window.matchMedia) {
+      window.matchMedia.removeEventListener("change", this.handleDarkMode)
     }
   }
 
@@ -58,6 +71,20 @@ export default class MyApp extends App {
       }
     }
     return false
+  }
+
+  handleVisibilityChange = () => {
+    if (document) {
+      this.setState({
+        visible: document.visibilityState === "visible"
+      })
+    }
+  }
+
+  handleDarkMode = () => {
+    this.setState({
+      dark: this.prefersDark()
+    })
   }
 
   render() {
@@ -120,6 +147,14 @@ export default class MyApp extends App {
               ? DARK_BACKGROUND
               : LIGHT_BACKGROUND} !important;
             color: ${dark ? DARK_TEXT : LIGHT_TEXT} !important;
+          }
+
+          input {
+            border: ${dark ? "none" : `1px solid #f7f7f7`} !important;
+          }
+
+          header {
+            border-bottom: 1px solid ${dark ? BLACK : "#f7f7f7"};
           }
 
           a,

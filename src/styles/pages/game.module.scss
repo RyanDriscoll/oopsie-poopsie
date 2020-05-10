@@ -1,8 +1,9 @@
-@import "../global/variables.scss";
+@import '../global/variables.scss';
 
 .game_page {
   padding: 0 5vw;
   overflow: scroll;
+  position: relative;
 
   @media only screen and (min-width: 768px) {
     padding: 0 10vw;
@@ -34,6 +35,39 @@
         height: 2.5vw;
         width: unset;
         margin-top: 1vw;
+      }
+    }
+  }
+  .countdown {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 10%;
+    opacity: 1;
+    z-index: 100000;
+    transform: scale(1);
+    pointer-events: none;
+
+    h1 {
+      animation: yoyo 1s infinite ease-in-out;
+      text-align: center;
+      font-size: 30vw;
+      pointer-events: none;
+
+      @media only screen and (min-width: 768px) {
+        font-size: 10vw;
+      }
+    }
+
+    @keyframes yoyo {
+      0% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(3);
+      }
+      100% {
+        transform: scale(1);
       }
     }
   }

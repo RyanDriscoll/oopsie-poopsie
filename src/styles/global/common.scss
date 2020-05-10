@@ -98,8 +98,8 @@ a {
 
 input {
   border-radius: 0;
-  &[type="button"],
-  &[type="submit"] {
+  &[type='button'],
+  &[type='submit'] {
     background: $red;
     color: $white;
     font-family: $font-bold;
@@ -123,7 +123,6 @@ input {
 header {
   padding: 2vw;
   text-align: center;
-  border-bottom: 1px solid #f7f7f7;
   margin-bottom: 3vw;
 
   @media only screen and (min-width: 768px) {
