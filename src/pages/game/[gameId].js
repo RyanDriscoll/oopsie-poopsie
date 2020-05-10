@@ -225,30 +225,21 @@ class Game extends Component {
                   this.listenToHand({ playerId, roundId: value })
                 ])
               }
-              if (key === "currentPlayer" && value === playerId) {
-                await this.yourTurn()
-              }
             }
           )
         }),
         this.gameRef.on("child_changed", data => {
           let value = data.val()
           const key = data.key
-          this.setState(
-            prevState =>
-              key === "roundId"
-                ? {
-                    showScore: true,
-                    game: { ...prevState.game, [key]: value }
-                  }
-                : {
-                    game: { ...prevState.game, [key]: value }
-                  },
-            async () => {
-              if (key === "currentPlayer" && value === playerId) {
-                await this.yourTurn()
-              }
-            }
+          this.setState(prevState =>
+            key === "roundId"
+              ? {
+                  showScore: true,
+                  game: { ...prevState.game, [key]: value }
+                }
+              : {
+                  game: { ...prevState.game, [key]: value }
+                }
           )
         }),
         this.gameRef.on("child_removed", data => {
@@ -754,9 +745,6 @@ class Game extends Component {
       this.listenToRound(roundId),
       this.listenToHand({ playerId, roundId })
     ])
-    if (winner === playerId && status === "play") {
-      this.yourTurn()
-    }
     this.setState({
       winner: null
     })
@@ -1019,13 +1007,14 @@ class Game extends Component {
             </Row>
           </ModalBody>
         </Modal>
-        {(status === "play" || status === "bid") && Boolean(timeLimit) && (
+        {(status === "play" || status === "bid") && (
           <TurnChange
             timeLimit={timeLimit}
             playerId={playerId}
             currentPlayer={currentPlayer}
             winner={winner}
             randomPlay={this.randomPlay}
+            yourTurn={this.yourTurn}
           />
         )}
         {!isMobile && (

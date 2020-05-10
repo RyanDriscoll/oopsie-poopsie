@@ -1,6 +1,6 @@
-import React, { useContext, useEffect, useRef } from 'react'
-import CombinedContext from '../context/CombinedContext'
-import Timer from './Timer'
+import React, { useContext, useEffect, useRef } from "react"
+import CombinedContext from "../context/CombinedContext"
+import Timer from "./Timer"
 
 const TurnChange = ({
   timeLimit,
@@ -8,6 +8,7 @@ const TurnChange = ({
   currentPlayer,
   winner,
   randomPlay,
+  yourTurn
 }) => {
   const { setState, timer } = useContext(CombinedContext)
 
@@ -19,6 +20,9 @@ const TurnChange = ({
         setState({ timer: timeLimit })
       } else if (winner) {
         setState({ timer: timeLimit })
+      }
+      if (currentPlayer === playerId || winner === playerId) {
+        yourTurn()
       }
     }
     prevCurrentPlayer.current = currentPlayer
