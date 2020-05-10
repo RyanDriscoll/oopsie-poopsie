@@ -27,10 +27,11 @@ const Players = ({
   dealer,
   thisPlayer,
   gameScore,
+  timeLimit,
   winnerModalShowing,
   status
 }) => {
-  const { dark } = useContext(CombinedContext)
+  const { dark, timer } = useContext(CombinedContext)
   let newPlayers = []
   let nextPlayer = thisPlayer
   const haveNextPlayer =
@@ -59,6 +60,8 @@ const Players = ({
           if (!status || status === "pending") {
             playerScore = ""
           }
+          const timerShowMax = timeLimit > 10 ? 10 : 5
+
           return (
             <li key={playerId}>
               <Row
@@ -70,6 +73,14 @@ const Players = ({
               >
                 <Col xs="4" className="d-flex align-items-center">
                   <div className="player-score" data-player-score={playerScore}>
+                    {thisPlayer !== currentPlayer &&
+                      currentPlayer === playerId &&
+                      timer >= 0 &&
+                      timer <= timerShowMax && (
+                        <div className={styles.countdown}>
+                          <h1 className="red-text">{timer}</h1>
+                        </div>
+                      )}
                     <h2
                       className={classNames({
                         [styles.current_player]: isCurrent,
@@ -183,7 +194,7 @@ const Players = ({
                       <Button
                         className={styles.bid_button}
                         color="primary"
-                        onClick={submitBid}
+                        onClick={() => submitBid()}
                       >
                         BID
                       </Button>
