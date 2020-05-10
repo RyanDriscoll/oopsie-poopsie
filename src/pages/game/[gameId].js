@@ -44,6 +44,7 @@ import {
   nextRound
 } from "../../utils/api"
 import CustomTrump from "../../components/CustomTrump"
+import TurnChange from "../../components/TurnChange"
 
 const INITIAL_STATE = {
   game: null,
@@ -56,7 +57,7 @@ const INITIAL_STATE = {
   bids: {},
   tricks: [],
   trickIndex: 0,
-  trickWinner: null,
+  winner: null,
   roundScore: {},
   showScore: false,
   showYourTurn: false,
@@ -456,13 +457,46 @@ class Game extends Component {
 
   yourTurn = async () => {
     const { queuedCard } = this.state
+    const { visible } = this.context
     if (queuedCard) {
       this.autoPlayTimeout = setTimeout(async () => {
         await this.playCard(queuedCard)
         this.setState({ queuedCard: null })
       }, 700)
     } else {
-      this.setState({ showYourTurn: true })
+      if (!visible) {
+        this.setState({ showYourTurn: true })
+      }
+    }
+  }
+
+  randomPlay = () => {
+    const {
+      hand,
+      tricks,
+      trickIndex,
+      game: { status }
+    } = this.state
+    if (status === "play") {
+      let handCopy = [...hand]
+      let leadSuit
+      const trick = tricks[trickIndex]
+      if (trick && trick.leadSuit) {
+        leadSuit = trick.leadSuit
+      }
+      let randomIndex = Math.floor(Math.random() * handCopy.length)
+      let card = handCopy[randomIndex]
+      while (!isLegal({ hand, leadSuit, card: handCopy[randomIndex] })) {
+        handCopy.splice(randomIndex, 1)
+        randomIndex = Math.floor(Math.random() * handCopy.length)
+        card = handCopy[randomIndex]
+      }
+      if (card) {
+        this.playCard(card)
+      }
+    } else if (status === "bid") {
+      const randomBid = Math.floor(Math.random() * (hand.length + 1))
+      this.submitBid(randomBid)
     }
   }
 
@@ -470,7 +504,7 @@ class Game extends Component {
     try {
       this.context.setState({ loading: true })
       const {
-        game: { name, numCards, noBidPoints, dirty, gameId },
+        game: { name, numCards, noBidPoints, dirty, timeLimit, gameId },
         playerName
       } = this.state
       const body = {
@@ -478,7 +512,8 @@ class Game extends Component {
         name: playerName,
         numCards,
         noBidPoints,
-        dirty
+        dirty,
+        timeLimit: timeLimit ? Number(timeLimit) : null
       }
       const response = await newGame(body)
       if (response.ok) {
@@ -658,12 +693,13 @@ class Game extends Component {
     }
   }
 
-  submitBid = async () => {
+  submitBid = async optionalBid => {
     try {
       this.context.setState({ loading: true })
+      const bid = optionalBid ? optionalBid : this.state.bid
       const { gameId } = this.props
-      const { bid, playerId, game, bids, players } = this.state
-      const { numPlayers, roundId } = game
+      const { playerId, game, bids, players } = this.state
+      const { numPlayers, roundId, timeLimit } = game
       const allBidsIn = Object.keys(bids || {}).length === numPlayers - 1
       const nextPlayerId = players[playerId].nextPlayer
       const body = {
@@ -674,7 +710,6 @@ class Game extends Component {
         allBidsIn,
         roundId
       }
-
       await submitBid(body)
       this.context.setState({ loading: false })
     } catch (error) {
@@ -712,12 +747,16 @@ class Game extends Component {
   closeModal = async () => {
     const {
       playerId,
-      game: { roundId }
+      game: { roundId, status },
+      winner
     } = this.state
     await Promise.all([
       this.listenToRound(roundId),
       this.listenToHand({ playerId, roundId })
     ])
+    if (winner === playerId && status === "play") {
+      this.yourTurn()
+    }
     this.setState({
       winner: null
     })
@@ -753,7 +792,8 @@ class Game extends Component {
       roundNum,
       numRounds,
       numCards,
-      nextGame
+      nextGame,
+      timeLimit
     if (game) {
       name = game.name
       status = game.status
@@ -765,6 +805,7 @@ class Game extends Component {
       numRounds = game.numRounds
       numCards = game.numCards
       nextGame = game.nextGame
+      timeLimit = game.timeLimit
     }
 
     const trick = tricks[trickIndex]
@@ -775,11 +816,18 @@ class Game extends Component {
     const user = players[playerId]
     const userName = (user && user.name) || ""
 
-    const { dark } = this.context
+    const { dark, timer } = this.context
+
+    const timerShowMax = timeLimit > 10 ? 10 : 5
 
     return (
       <>
         <div className={styles.game_page}>
+          {playerId === currentPlayer && timer >= 0 && timer <= timerShowMax && (
+            <div className={styles.countdown}>
+              <h1 className="red-text">{timer}</h1>
+            </div>
+          )}
           <Row className={styles.info_row}>
             <Col xs="4">
               {name && <h2 style={{ textDecoration: "underline" }}>{name}</h2>}
@@ -863,6 +911,7 @@ class Game extends Component {
             afterBid={() => this.setState({ bid: 0 })}
             thisPlayer={playerId}
             gameScore={gameScore}
+            timeLimit={timeLimit}
             winnerModalShowing={Boolean(winner)}
             status={status}
           />
@@ -970,6 +1019,15 @@ class Game extends Component {
             </Row>
           </ModalBody>
         </Modal>
+        {(status === "play" || status === "bid") && Boolean(timeLimit) && (
+          <TurnChange
+            timeLimit={timeLimit}
+            playerId={playerId}
+            currentPlayer={currentPlayer}
+            winner={winner}
+            randomPlay={this.randomPlay}
+          />
+        )}
         {!isMobile && (
           <NotificationController
             showNotification={showYourTurn}
