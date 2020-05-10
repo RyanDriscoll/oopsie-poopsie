@@ -1,4 +1,4 @@
-@import "../global/variables.scss";
+@import '../global/variables.scss';
 
 ul.players {
   list-style: none;
@@ -15,6 +15,41 @@ ul.players {
 
     @media only screen and (min-width: 768px) {
       margin-bottom: 1vw;
+    }
+
+    .countdown {
+      position: absolute;
+      left: 0;
+      right: 0;
+      opacity: 1;
+      z-index: 100000;
+      transform: scale(1);
+      pointer-events: none;
+
+      h1 {
+        animation: yoyo 1s infinite ease-in-out;
+        text-align: center;
+        font-size: 5vw;
+        pointer-events: none;
+        margin-top: 1.5vw;
+
+        @media only screen and (min-width: 768px) {
+          margin-top: 0;
+          font-size: 3vw;
+        }
+      }
+
+      @keyframes yoyo {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(3);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
     }
 
     button,
@@ -59,7 +94,7 @@ ul.players {
     }
 
     .dealer::after {
-      content: "dealer";
+      content: 'dealer';
       bottom: -50%;
       right: 0;
     }
@@ -102,7 +137,7 @@ ul.players {
         &.current_player_arrow {
           &::before {
             position: absolute;
-            content: "-->";
+            content: '-->';
             left: -6vw;
             top: 0;
             bottom: 0;
