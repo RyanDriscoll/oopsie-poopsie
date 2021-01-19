@@ -1,128 +1,128 @@
-import React, { useState, useRef, useContext, useEffect } from "react"
-import Link from "next/link"
-import Container from "reactstrap/lib/Container"
-import Button from "reactstrap/lib/Button"
-import Form from "reactstrap/lib/Form"
-import FormGroup from "reactstrap/lib/FormGroup"
-import Label from "reactstrap/lib/Label"
-import Input from "reactstrap/lib/Input"
-import InputGroup from "reactstrap/lib/InputGroup"
-import InputGroupAddon from "reactstrap/lib/InputGroupAddon"
-import Dropdown from "reactstrap/lib/Dropdown"
-import DropdownItem from "reactstrap/lib/DropdownItem"
-import DropdownMenu from "reactstrap/lib/DropdownMenu"
-import DropdownToggle from "reactstrap/lib/DropdownToggle"
-import Row from "reactstrap/lib/Row"
-import { withRouter } from "next/router"
-import { absoluteUrl } from "../utils/helpers"
-import { newGame } from "../utils/api"
-import styles from "../styles/pages/home.module.scss"
-import { CopyIcon } from "../components/Icons"
-import Col from "reactstrap/lib/Col"
-import CombinedContext from "../context/CombinedContext"
-import classnames from "classnames"
+import React, { useState, useRef, useContext, useEffect } from "react";
+import Link from "next/link";
+import Container from "reactstrap/lib/Container";
+import Button from "reactstrap/lib/Button";
+import Form from "reactstrap/lib/Form";
+import FormGroup from "reactstrap/lib/FormGroup";
+import Label from "reactstrap/lib/Label";
+import Input from "reactstrap/lib/Input";
+import InputGroup from "reactstrap/lib/InputGroup";
+import InputGroupAddon from "reactstrap/lib/InputGroupAddon";
+import Dropdown from "reactstrap/lib/Dropdown";
+import DropdownItem from "reactstrap/lib/DropdownItem";
+import DropdownMenu from "reactstrap/lib/DropdownMenu";
+import DropdownToggle from "reactstrap/lib/DropdownToggle";
+import Row from "reactstrap/lib/Row";
+import { withRouter } from "next/router";
+import { absoluteUrl } from "../utils/helpers";
+import { newGame } from "../utils/api";
+import styles from "../styles/pages/home.module.scss";
+import { CopyIcon } from "../components/Icons";
+import Col from "reactstrap/lib/Col";
+import CombinedContext from "../context/CombinedContext";
+import classnames from "classnames";
 
-const timeLimitOptions = ["none", "90", "60", "30", "10"]
+const timeLimitOptions = ["none", "90", "60", "30", "10"];
 
 const CreateGame = ({ origin, router }) => {
-  const [name, setName] = useState("")
-  const [game, setGame] = useState("")
-  const [gameCode, setGameCode] = useState("")
-  const [gameId, setGameId] = useState("")
-  const [url, setUrl] = useState("")
-  const [copySuccess, setCopySuccess] = useState("")
-  const [dirty, setDirty] = useState(false)
-  const [bidPoints, setBidPoints] = useState(false)
-  const [timeLimit, setTimeLimit] = useState("")
-  const [numCards, setNumCards] = useState(5)
-  const [create, setCreate] = useState(true)
-  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [playerName, setPlayerName] = useState("");
+  const [gameName, setGameName] = useState("");
+  const [gameCode, setGameCode] = useState("");
+  const [gameId, setGameId] = useState("");
+  const [url, setUrl] = useState("");
+  const [copySuccess, setCopySuccess] = useState("");
+  const [dirty, setDirty] = useState(false);
+  const [bidPoints, setBidPoints] = useState(false);
+  const [timeLimit, setTimeLimit] = useState("");
+  const [numCards, setNumCards] = useState(5);
+  const [create, setCreate] = useState(true);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  const gameUrlRef = useRef(null)
+  const gameUrlRef = useRef(null);
 
-  const { setState } = useContext(CombinedContext)
+  const { setState } = useContext(CombinedContext);
 
   useEffect(() => {
-    setState({ mounted: true })
-    setName(localStorage.getItem("player-name") || "")
+    setState({ mounted: true });
+    setPlayerName(localStorage.getItem("player-name") || "");
     return () => {
-      setState({ mounted: false })
-    }
-  }, [])
+      setState({ mounted: false });
+    };
+  }, []);
 
   const toggle = () => {
-    setDropdownOpen(prevState => !prevState)
-  }
+    setDropdownOpen(prevState => !prevState);
+  };
 
   const handleChange = e => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
     switch (name) {
-      case "name":
-        setName(value)
-        break
-      case "game":
-        setGame(value)
-        break
+      case "player-name":
+        setPlayerName(value);
+        break;
+      case "game-name":
+        setGameName(value);
+        break;
       case "game-code":
-        setGameCode(value)
-        break
+        setGameCode(value);
+        break;
       default:
-        break
+        break;
     }
-  }
+  };
 
   const handleNumCards = inc => {
-    const newNumCards = inc ? numCards + 1 : numCards - 1
+    const newNumCards = inc ? numCards + 1 : numCards - 1;
     if (newNumCards <= 10 && newNumCards >= 1) {
-      setNumCards(newNumCards)
+      setNumCards(newNumCards);
     }
-  }
+  };
 
   const handleDropDown = (e, val) => {
-    setTimeLimit(val || null)
+    setTimeLimit(val || null);
     setTimeout(() => {
-      setDropdownOpen(false)
-    }, 10)
-  }
+      setDropdownOpen(false);
+    }, 10);
+  };
 
   const initializeGame = async () => {
     try {
-      setState({ loading: true })
+      setState({ loading: true });
       const body = {
-        game,
-        name,
+        gameName,
+        playerName,
         numCards,
         bidPoints,
         dirty,
-        timeLimit: timeLimit ? Number(timeLimit) : null
-      }
-      const response = await newGame(body)
+        timeLimit: timeLimit ? Number(timeLimit) : null,
+      };
+      const response = await newGame(body);
       if (response.ok) {
-        const { playerId, gameId: gameIdResponse } = await response.json()
-        localStorage.setItem(`oh-shit-${gameIdResponse}-player-id`, playerId)
-        localStorage.setItem(`player-name`, name)
-        setGameId(gameIdResponse)
-        setUrl(`${origin}/game/${gameIdResponse}`)
-        setName("")
-        setGame("")
+        const { playerId, gameId: gameIdResponse } = await response.json();
+        localStorage.setItem(`oh-shit-${gameIdResponse}-player-id`, playerId);
+        localStorage.setItem(`player-name`, playerName);
+        setGameId(gameIdResponse);
+        setUrl(`${origin}/game/${gameIdResponse}`);
+        setPlayerName("");
+        setGameName("");
       }
-      setState({ loading: false })
+      setState({ loading: false });
     } catch (error) {
-      setState({ loading: false, error: true })
-      console.error(`$$>>>>: initializeGame -> error`, error)
+      setState({ loading: false, error: true });
+      console.error(`$$>>>>: initializeGame -> error`, error);
     }
-  }
+  };
 
   const joinGame = () => {
-    router.push("/game/[gameId]", `/game/${gameCode}`)
-  }
+    router.push("/game/[gameId]", `/game/${gameCode}`);
+  };
 
   const copyToClipboard = e => {
-    gameUrlRef.current.select()
-    document.execCommand("copy")
-    e.target.focus()
-    setCopySuccess("Copied!")
-  }
+    gameUrlRef.current.select();
+    document.execCommand("copy");
+    e.target.focus();
+    setCopySuccess("Copied!");
+  };
 
   return (
     <Container id={styles.home}>
@@ -172,7 +172,7 @@ const CreateGame = ({ origin, router }) => {
                 <h2
                   className={classnames({
                     [styles.toggle]: true,
-                    [styles.selected]: create
+                    [styles.selected]: create,
                   })}
                   onClick={() => setCreate(true)}
                 >
@@ -183,7 +183,7 @@ const CreateGame = ({ origin, router }) => {
                 <h2
                   className={classnames({
                     [styles.toggle]: true,
-                    [styles.selected]: !create
+                    [styles.selected]: !create,
                   })}
                   onClick={() => setCreate(false)}
                 >
@@ -196,25 +196,25 @@ const CreateGame = ({ origin, router }) => {
             {create ? (
               <Form>
                 <FormGroup>
-                  <Label for="game">Game Name</Label>
+                  <Label for="game-name">Game Name</Label>
                   <Input
                     data-lpignore="true"
                     type="text"
-                    name="game"
-                    id="game"
-                    value={game}
+                    name="game-name"
+                    id="game-name"
+                    value={gameName}
                     onChange={handleChange}
                     placeholder="optional"
                   />
                 </FormGroup>
                 <FormGroup>
-                  <Label for="name">User Name</Label>
+                  <Label for="player-name">User Name</Label>
                   <Input
                     data-lpignore="true"
                     type="text"
-                    name="name"
-                    id="name"
-                    value={name}
+                    name="player-name"
+                    id="player-name"
+                    value={playerName}
                     onChange={handleChange}
                   />
                 </FormGroup>
@@ -304,7 +304,7 @@ const CreateGame = ({ origin, router }) => {
 
                 <div className="d-flex justify-content-center mt-3">
                   <Button
-                    disabled={!name}
+                    disabled={!playerName}
                     color="primary"
                     onClick={initializeGame}
                   >
@@ -341,12 +341,12 @@ const CreateGame = ({ origin, router }) => {
         </Row>
       )}
     </Container>
-  )
-}
+  );
+};
 
 CreateGame.getInitialProps = ({ req, res }) => {
-  const { origin } = absoluteUrl(req, "localhost:3000")
-  return { origin }
-}
+  const { origin } = absoluteUrl(req, "localhost:3000");
+  return { origin };
+};
 
-export default withRouter(CreateGame)
+export default withRouter(CreateGame);
